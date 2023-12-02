@@ -3,6 +3,7 @@ using OpenMatchFunction.Configurations;
 using OpenMatchFunction.Interceptors;
 using OpenMatchFunction.OM;
 using Microsoft.Extensions.Http.Resilience;
+using OpenMatchFunction.Exceptions;
 using OpenMatchFunction.Services;
 using Serilog;
 using Serilog.Formatting.Compact;
@@ -15,6 +16,7 @@ var builder = WebApplication.CreateSlimBuilder(args);	 // .net 8 + AOT supported
 //var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog();
+builder.Services.AddExceptionHandler<DefaultExceptionHandler>();
 builder.Services.AddHttpContextAccessor();
 builder.Services
     .AddGrpcService()
