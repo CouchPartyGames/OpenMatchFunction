@@ -1,3 +1,4 @@
+using System.Data.SqlTypes;
 using OpenMatchFunction.Services;
 using OpenMatchFunction.Configurations;
 using OpenMatchFunction.Interceptors;
@@ -29,9 +30,16 @@ builder.Services
         o.Address = new Uri(host);
     }).ConfigureChannel(o =>
     {
+        o.HttpHandler = new SocketsHttpHandler()
+        {
+            PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
+            KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
+            KeepAlivePingDelay = TimeSpan.FromSeconds(60),
+            EnableMultipleHttp2Connections = true
+        };
         o.MaxRetryAttempts = 4;
     })
-    //.AddInterceptor<ClientLoggingInterceptor>()
+    .AddInterceptor<ExceptionInterceptor>()
     .AddStandardResilienceHandler();
 
 
@@ -43,7 +51,6 @@ if (app.Environment.IsDevelopment()) {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "MatchFunction V1");
     });*/
 }
-
 
 app.UseSerilogRequestLogging();
 app.MapGrpcService<MatchFunctionRunService>();

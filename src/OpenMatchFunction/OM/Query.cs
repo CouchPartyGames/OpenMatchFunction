@@ -7,7 +7,7 @@ public class Query
     {
         private QueryTicketsRequest _request = new();
 
-        public RequestBuilder WithPools(Pool pool)
+        public RequestBuilder WithPool(Pool pool)
         {
             _request.Pool = pool;
             return this;

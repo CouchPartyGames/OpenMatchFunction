@@ -1,11 +1,12 @@
-﻿namespace OpenMatchFunction.Services;
+﻿using Google.Protobuf.Collections;
+
+namespace OpenMatchFunction.Services;
 
 using OpenMatch;
 using OpenMatchFunction.OM;
 
 public class MatchFunctionRunService : MatchFunction.MatchFunctionBase
 {
-
 	private readonly QueryService.QueryServiceClient _queryClient;
 
 	public MatchFunctionRunService(GrpcClientFactory grpcClientFactory)
@@ -22,18 +23,15 @@ public class MatchFunctionRunService : MatchFunction.MatchFunctionBase
 	    */
 
 	    QueryTicketsRequest queryRequest = new Query.RequestBuilder()
-		    .WithPools(new Pool())
+		    .WithPool(new Pool())
 		    .Build();
 
 			// https://openmatch.dev/site/docs/reference/api/#queryservice
 	    using var call = _queryClient.QueryTickets(queryRequest);
-
-	    while(await call.ResponseStream.MoveNext())
+	    await foreach(var tixResponse in call.ResponseStream.ReadAllAsync())
 	    {
-		    //call.ResponseStream.Current.Tickets;
-		    
 				 // Get Proposals (matches)
-			var matches = GetMatches(request.Profile);
+			var matches = GetMatches(request.Profile, tixResponse.Tickets);
 			
 			foreach (var match in matches) {
 					 // Respond with Proposals
@@ -43,13 +41,11 @@ public class MatchFunctionRunService : MatchFunction.MatchFunctionBase
 
 				await responseStream.WriteAsync(response);
 			}
-		    
 	    }
-
     }
 
     // https://openmatch.dev/site/docs/reference/api/#openmatch-MatchProfile
-    public List<Match> GetMatches(MatchProfile profile)
+    public List<Match> GetMatches(MatchProfile profile, RepeatedField<Ticket> tickets)
     {
 	    //profile.Extensions;
 	    //profile.Pools;
@@ -62,7 +58,7 @@ public class MatchFunctionRunService : MatchFunction.MatchFunctionBase
 		    .WithId(matchId)
 		    .WithFunctionName(matchFunction)
 		    .WithProfileName(profileName)
-		    //.AddTicket()
+		    //.AddTicket(tickets)
 		    //.AddExtension()
 		    .Build();
 	    

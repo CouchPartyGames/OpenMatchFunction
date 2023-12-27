@@ -1,4 +1,5 @@
-﻿using OpenMatchFunction.Interceptors;
+﻿using System.IO.Compression;
+using OpenMatchFunction.Interceptors;
 using Microsoft.OpenApi.Models;
 
 namespace OpenMatchFunction.Configurations;
@@ -6,12 +7,17 @@ namespace OpenMatchFunction.Configurations;
 public static class ServiceCollections {
 
     public static IServiceCollection AddGrpcService(this IServiceCollection services) {
-        services.AddGrpc(o =>
-        {
-            o.Interceptors.Add<ExceptionInterceptor>();
-            o.EnableDetailedErrors = true;
-        }).AddJsonTranscoding();
-        //services.AddGrpcReflection();
+        services
+            .AddGrpc(o =>
+            {
+                var msgSize = 1024 * 1024 * 4;  // MB
+                o.Interceptors.Add<ExceptionInterceptor>();
+                o.EnableDetailedErrors = true;
+                o.MaxReceiveMessageSize = msgSize;
+                o.MaxReceiveMessageSize = msgSize;
+                o.ResponseCompressionLevel = CompressionLevel.Optimal;
+            })
+            .AddJsonTranscoding();
 
         return services;
     }
