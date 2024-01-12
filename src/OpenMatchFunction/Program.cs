@@ -14,7 +14,6 @@ Log.Logger = new LoggerConfiguration()
     .CreateLogger();
 
 var builder = WebApplication.CreateSlimBuilder(args);	 // .net 8 + AOT supported
-//var builder = WebApplication.CreateBuilder(args);
 
 builder.Host.UseSerilog();
 builder.Services.AddExceptionHandler<DefaultExceptionHandler>();
