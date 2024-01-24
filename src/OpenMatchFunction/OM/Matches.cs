@@ -48,6 +48,12 @@ public sealed class Matches
             return this;
         }
 
+        public MatchBuilder AddTickets(List<Ticket> tickets)
+        {
+            _match.Tickets.Add(tickets);
+            return this;
+        }
+
         public MatchBuilder AddExtension()
         {
             return this;

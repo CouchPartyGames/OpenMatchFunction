@@ -9,61 +9,62 @@ public class MatchFunctionRunService : MatchFunction.MatchFunctionBase
 {
 	private readonly QueryService.QueryServiceClient _queryClient;
 
+	private const string MatchFunctionName = "basic-match";
+
+	private QueryPools _queryPools;
+
 	public MatchFunctionRunService(GrpcClientFactory grpcClientFactory)
 	{
 		 _queryClient = grpcClientFactory.CreateClient<QueryService.QueryServiceClient>(Constants.OpenMatchQuery);
+		 _queryPools = new QueryPools(_queryClient);
 	}
 
     public override async Task Run(RunRequest request, IServerStreamWriter<RunResponse> responseStream, ServerCallContext context)
     {
-	    /*
-	    request.Profile.Name;
-	    request.Profile.Pools;
-	    request.Profile.Extensions;
-	    */
+			// Fetch Tickets from Pools
+	    var tickets = _queryPools.QueryMultiplePools(request.Profile.Pools);
 
-	    QueryTicketsRequest queryRequest = new Query.RequestBuilder()
-		    .WithPool(new Pool())
-		    .Build();
+			// Generate Proposals
+		 var proposals = GetProposals(request.Profile, tickets);
+		 
+			// Send Back Matches
+		 foreach (var match in proposals) {
+				  // Respond with Proposals
+			 var response = new Matches.ResponseBuilder()
+				 .WithMatch(match)
+				 .Build();
 
-			// https://openmatch.dev/site/docs/reference/api/#queryservice
-	    using var call = _queryClient.QueryTickets(queryRequest);
-	    await foreach(var tixResponse in call.ResponseStream.ReadAllAsync())
-	    {
-				 // Get Proposals (matches)
-			var matches = GetMatches(request.Profile, tixResponse.Tickets);
-			
-			foreach (var match in matches) {
-					 // Respond with Proposals
-				var response = new Matches.ResponseBuilder()
-					.WithMatch(match)
-					.Build();
-
-				await responseStream.WriteAsync(response);
-			}
-	    }
+			 await responseStream.WriteAsync(response); 
+		 }
     }
 
     // https://openmatch.dev/site/docs/reference/api/#openmatch-MatchProfile
-    public List<Match> GetMatches(MatchProfile profile, RepeatedField<Ticket> tickets)
+    public List<Match> GetProposals(MatchProfile profile, List<TicketsInPool> tickets)
     {
-	    //profile.Extensions;
-	    //profile.Pools;
+	    var matches = new List<Match>();
+	    var matchTickets = new List<Ticket>();
+		string matchFunction = MatchFunctionName;
+		string matchId = $"profile-{profile.Name}-";
+		string profileName = profile.Name;
 	    
-	    string matchId = "test";
-	    string matchFunction = "test";
-	    string profileName = profile.Name;
-	    
-	    var match = new Matches.MatchBuilder()
-		    .WithId(matchId)
-		    .WithFunctionName(matchFunction)
-		    .WithProfileName(profileName)
-		    //.AddTicket(tickets)
-		    //.AddExtension()
-		    .Build();
-	    
-	    return new List<Match> {
-		    match
-	    };
+		foreach (var item in tickets)
+		{
+			 foreach (var tix in item.Tickets.ToList())
+			 {
+				 matchTickets.Add(tix);
+			 }
+			 // Remove from Pool Tickets
+		}
+
+		var match = new Matches.MatchBuilder()
+			 .WithId(matchId)
+			 .WithFunctionName(matchFunction)
+			 .WithProfileName(profileName)
+			 .AddTickets(matchTickets)
+			 //.AddExtension()
+			 .Build();
+
+		matches.Add(match);
+	    return matches;
     }
 }

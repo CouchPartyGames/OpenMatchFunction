@@ -1,35 +1,52 @@
 ﻿using System.Threading.Tasks;
 using System.Threading;
+using Google.Protobuf;
 using Google.Protobuf.Collections;
 
 namespace OpenMatchFunction.OM;
 
-public class QueryPools
+public record TicketsInPool(string Name, RepeatedField<Ticket> Tickets);
+
+public sealed class QueryPools(QueryService.QueryServiceClient client)
 {
-    public async Task<bool> Query(QueryService.QueryServiceClient client, MatchProfile profile)
+    private readonly QueryService.QueryServiceClient _client = client;
+
+    public async Task<TicketsInPool> QuerySinglePool(Pool pool)
     {
-        var tasks = new List<Task>();
-        foreach (var pool in profile.Pools)
+        RepeatedField<Ticket> tickets = new();
+        QueryTicketsRequest request = new QueryTicketsRequest
         {
-           tasks.Add(Task.Run(() =>
-           {
-               //client.QueryTickets(request);
-           })); 
+            Pool = pool
+        };
+        using var call = _client.QueryTickets(request);
+        await foreach (var response in call.ResponseStream.ReadAllAsync())
+        {
+            tickets.Add(response.Tickets);
         }
-        
-        var continuation = Task.WhenAll(tasks);
-        
+
+        return new TicketsInPool(pool.Name, tickets);
+    }
+
+    public List<TicketsInPool> QueryMultiplePools(RepeatedField<Pool> pools)
+    {
+        var tasks = new List<Task<TicketsInPool>>();
+        foreach (var pool in pools)
+        {
+            tasks.Add(QuerySinglePool(pool));
+        }
+
+        Task<TicketsInPool[]> continuation = Task.WhenAll(tasks);
         try
         {
             continuation.Wait();
         }
-        catch (AggregateException)
-        {
-            
-        }
+        catch (AggregateException) { }
         
-        return true;
+        if (continuation.Status == TaskStatus.RanToCompletion)
+        {
+            return continuation.Result.ToList();
+        }
+
+        return new List<TicketsInPool>();
     }
 }
-
-public sealed record PoolMap(string PoolName, RepeatedField<Ticket> Tickets);

@@ -5,7 +5,6 @@ using OpenMatchFunction.Interceptors;
 using OpenMatchFunction.OM;
 using Microsoft.Extensions.Http.Resilience;
 using OpenMatchFunction.Exceptions;
-using OpenMatchFunction.Services;
 using Serilog;
 using Serilog.Formatting.Compact;
 
