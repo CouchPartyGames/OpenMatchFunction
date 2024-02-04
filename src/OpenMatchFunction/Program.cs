@@ -1,9 +1,7 @@
-using System.Data.SqlTypes;
 using OpenMatchFunction.Services;
 using OpenMatchFunction.Configurations;
 using OpenMatchFunction.Interceptors;
 using OpenMatchFunction.OM;
-using Microsoft.Extensions.Http.Resilience;
 using OpenMatchFunction.Exceptions;
 using Serilog;
 using Serilog.Formatting.Compact;
@@ -21,6 +19,18 @@ builder.Services
     .AddGrpcService()
     .AddHealthChecksService();
 //.AddSwaggerService();
+builder.Services.AddOpenTelemetry()
+    .WithMetrics(metrics =>
+    {
+        metrics.AddMeter("Grpc.Net.Client");
+        metrics.AddMeter("Grpc.AspNetCore.Server");
+        
+        /*metrics.AddOtlpExporter(o =>
+        {
+            var endpoint = builder.Configuration["OpenTelemety:Endpoint"] ?? "http://localhost";
+            o.Endpoint = new Uri(endpoint);
+        });*/
+    });
 
 builder.Services
     .AddGrpcClient<QueryService.QueryServiceClient>(Constants.OpenMatchQuery, o => {
