@@ -55,3 +55,5 @@ app.MapGrpcService<MatchFunctionRunService>();
 app.MapGrpcHealthChecksService();
 
 app.Run();
+
+public partial class Program { }

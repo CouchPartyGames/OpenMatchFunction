@@ -2,7 +2,8 @@ using Google.Rpc.Context;
 
 namespace OpenMatchFunction.Tests.Integration;
 
-public class UnitTest1
+/*
+public class MatchFunctionRunServiceTests : IntegrationTestBase<Program>
 {
     [Fact]
     public void Run_ShouldReturnSuccess_When()
@@ -16,4 +17,4 @@ public class UnitTest1
         // Assert
         //response.Should().
     }
-}
+}*/

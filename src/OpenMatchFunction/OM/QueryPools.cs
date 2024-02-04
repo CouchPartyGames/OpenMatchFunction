@@ -17,8 +17,9 @@ public sealed class QueryPools(QueryService.QueryServiceClient client)
         QueryTicketsRequest request = new QueryTicketsRequest
         {
             Pool = pool
+            
         };
-        using var call = _client.QueryTickets(request);
+        using var call = _client.QueryTickets(request, deadline: DateTime.UtcNow.AddSeconds(5));
         await foreach (var response in call.ResponseStream.ReadAllAsync())
         {
             tickets.Add(response.Tickets);

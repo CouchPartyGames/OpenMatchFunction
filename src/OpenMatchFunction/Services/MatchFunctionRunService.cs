@@ -5,7 +5,11 @@ namespace OpenMatchFunction.Services;
 using OpenMatch;
 using OpenMatchFunction.OM;
 
-public class MatchFunctionRunService : MatchFunction.MatchFunctionBase
+public interface IMatchFunctionRunService
+{
+}
+
+public class MatchFunctionRunService : MatchFunction.MatchFunctionBase, IMatchFunctionRunService
 {
 	private readonly QueryService.QueryServiceClient _queryClient;
 
