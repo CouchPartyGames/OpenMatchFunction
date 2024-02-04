@@ -11,7 +11,7 @@ public static class ServiceCollections {
             .AddGrpc(o =>
             {
                 var msgSize = 1024 * 1024 * 4;  // MB
-                o.Interceptors.Add<ExceptionInterceptor>();
+                o.Interceptors.Add<ServerLoggerInterceptor>();
                 o.EnableDetailedErrors = true;
                 o.MaxReceiveMessageSize = msgSize;
                 o.MaxReceiveMessageSize = msgSize;

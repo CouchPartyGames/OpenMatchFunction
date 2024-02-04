@@ -3,12 +3,18 @@ using OpenMatchFunction.Configurations;
 using OpenMatchFunction.Interceptors;
 using OpenMatchFunction.OM;
 using OpenMatchFunction.Exceptions;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
 using Serilog;
 using Serilog.Formatting.Compact;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console(new CompactJsonFormatter())
     .CreateLogger();
+
+var resourceBuilder = ResourceBuilder.CreateDefault()
+    .AddService("OpenMatchFunction")
+    .AddTelemetrySdk();
 
 var builder = WebApplication.CreateSlimBuilder(args);	 // .net 8 + AOT supported
 
@@ -22,6 +28,7 @@ builder.Services
 builder.Services.AddOpenTelemetry()
     .WithMetrics(metrics =>
     {
+        metrics.SetResourceBuilder(resourceBuilder);
         metrics.AddMeter("Grpc.Net.Client");
         metrics.AddMeter("Grpc.AspNetCore.Server");
         
@@ -47,7 +54,7 @@ builder.Services
         };
         o.MaxRetryAttempts = 4;
     })
-    .AddInterceptor<ExceptionInterceptor>()
+    .AddInterceptor<ClientLoggerInterceptor>()
     .AddStandardResilienceHandler();
 
 
