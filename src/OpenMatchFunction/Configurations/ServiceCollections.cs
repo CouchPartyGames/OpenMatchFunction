@@ -23,8 +23,7 @@ public static class ServiceCollections {
     }
 
     public static IServiceCollection AddHealthChecksService(this IServiceCollection services) {
-        services.AddGrpcHealthChecks()
-            .AddCheck("Sample", () => HealthCheckResult.Healthy());
+        services.AddGrpcHealthChecks();
 
         return services;
     }

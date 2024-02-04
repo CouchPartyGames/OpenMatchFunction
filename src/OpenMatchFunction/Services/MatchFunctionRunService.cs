@@ -25,6 +25,11 @@ public class MatchFunctionRunService : MatchFunction.MatchFunctionBase, IMatchFu
 
     public override async Task Run(RunRequest request, IServerStreamWriter<RunResponse> responseStream, ServerCallContext context)
     {
+	    var shouldThrow = false;
+	    if (shouldThrow)
+	    {
+		    throw new RpcException(new Status(StatusCode.InvalidArgument, "Name is required."));
+	    }
 			// Fetch Tickets from Pools
 	    var tickets = _queryPools.QueryMultiplePools(request.Profile.Pools);
 
