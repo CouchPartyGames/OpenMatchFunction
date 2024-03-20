@@ -3,8 +3,10 @@ using OpenMatchFunction.Configurations;
 using OpenMatchFunction.Interceptors;
 using OpenMatchFunction.OM;
 using OpenMatchFunction.Exceptions;
-using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 using Serilog;
 using Serilog.Formatting.Compact;
 
@@ -24,20 +26,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services
     .AddGrpcService()
     .AddHealthChecksService();
-//.AddSwaggerService();
-builder.Services.AddOpenTelemetry()
-    .WithMetrics(metrics =>
-    {
-        metrics.SetResourceBuilder(resourceBuilder);
-        metrics.AddMeter("Grpc.Net.Client");
-        metrics.AddMeter("Grpc.AspNetCore.Server");
-        
-        /*metrics.AddOtlpExporter(o =>
-        {
-            var endpoint = builder.Configuration["OpenTelemety:Endpoint"] ?? "http://localhost";
-            o.Endpoint = new Uri(endpoint);
-        });*/
-    });
+
 
 builder.Services
     .AddGrpcClient<QueryService.QueryServiceClient>(Constants.OpenMatchQuery, o => {
@@ -56,6 +45,36 @@ builder.Services
     })
     .AddInterceptor<ClientLoggerInterceptor>()
     .AddStandardResilienceHandler();
+
+builder.Services.AddOpenTelemetry()
+    .WithMetrics(opts =>
+    {
+        opts.SetResourceBuilder(resourceBuilder);
+        opts.AddHttpClientInstrumentation()
+            .AddAspNetCoreInstrumentation()
+            .AddRuntimeInstrumentation();
+        
+        opts.AddOtlpExporter(export =>
+        {
+            export.Endpoint = new Uri("http://otel");
+            export.Protocol = OtlpExportProtocol.HttpProtobuf;
+        });
+    })
+    .WithTracing(opts =>
+    {
+        opts.SetResourceBuilder(resourceBuilder);
+        opts.SetSampler(new TraceIdRatioBasedSampler(0.1f));
+        
+        opts.AddHttpClientInstrumentation()
+            .AddAspNetCoreInstrumentation()
+            .AddGrpcClientInstrumentation();
+        
+        opts.AddOtlpExporter(export =>
+        {
+            export.Endpoint = new Uri("http://otel");
+            export.Protocol = OtlpExportProtocol.HttpProtobuf;
+        });
+    });
 
 
 var app = builder.Build();
