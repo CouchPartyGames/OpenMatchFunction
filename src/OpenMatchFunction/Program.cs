@@ -27,7 +27,6 @@ builder.Services
     .AddGrpcService()
     .AddHealthChecksService();
 
-
 builder.Services
     .AddGrpcClient<QueryService.QueryServiceClient>(Constants.OpenMatchQuery, o => {
         var host = builder.Configuration["OPENMATCH_QUERY_HOST"] ?? "https://open-match-query.open-match.svc.cluster.local:50503";
