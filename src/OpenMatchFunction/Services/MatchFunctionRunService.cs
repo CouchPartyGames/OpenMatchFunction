@@ -1,13 +1,9 @@
-﻿using Google.Protobuf.Collections;
-
-namespace OpenMatchFunction.Services;
+﻿namespace OpenMatchFunction.Services;
 
 using OpenMatch;
 using OpenMatchFunction.OM;
 
-public interface IMatchFunctionRunService
-{
-}
+public interface IMatchFunctionRunService;
 
 public class MatchFunctionRunService : MatchFunction.MatchFunctionBase, IMatchFunctionRunService
 {
