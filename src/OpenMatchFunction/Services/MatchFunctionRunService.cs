@@ -25,26 +25,35 @@ public class MatchFunctionRunService : MatchFunction.MatchFunctionBase, IMatchFu
 
     public override async Task Run(RunRequest request, IServerStreamWriter<RunResponse> responseStream, ServerCallContext context)
     {
-	    var shouldThrow = false;
-	    if (shouldThrow)
+	    List<TicketsInPool> tickets = new();
+	    using (var activity = Telemetry.ActivitySource.StartActivity("RunRequest"))
 	    {
-		    throw new RpcException(new Status(StatusCode.InvalidArgument, "Name is required."));
+		    var shouldThrow = false;
+		    if (shouldThrow)
+		    {
+			    throw new RpcException(new Status(StatusCode.InvalidArgument, "Name is required."));
+		    }
+
+		    using (Telemetry.ActivitySource.StartActivity("FetchTickets"))
+		    {
+			    // Fetch Tickets from Pools
+			    tickets = _queryPools.QueryMultiplePools(request.Profile.Pools);
+		    }
+
+		    // Generate Proposals
+		    var proposals = GetProposals(request.Profile, tickets);
+
+		    // Send Back Matches
+		    foreach (var match in proposals)
+		    {
+			    // Respond with Proposals
+			    var response = new Matches.ResponseBuilder()
+				    .WithMatch(match)
+				    .Build();
+
+			    await responseStream.WriteAsync(response);
+		    }
 	    }
-			// Fetch Tickets from Pools
-	    var tickets = _queryPools.QueryMultiplePools(request.Profile.Pools);
-
-			// Generate Proposals
-		 var proposals = GetProposals(request.Profile, tickets);
-		 
-			// Send Back Matches
-		 foreach (var match in proposals) {
-				  // Respond with Proposals
-			 var response = new Matches.ResponseBuilder()
-				 .WithMatch(match)
-				 .Build();
-
-			 await responseStream.WriteAsync(response); 
-		 }
     }
 
     // https://openmatch.dev/site/docs/reference/api/#openmatch-MatchProfile

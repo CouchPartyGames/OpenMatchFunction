@@ -5,14 +5,10 @@ using OpenMatchFunction.OM;
 using OpenMatchFunction.Exceptions;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Exporter;
+using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
-using Serilog;
-using Serilog.Formatting.Compact;
 
-Log.Logger = new LoggerConfiguration()
-    .WriteTo.Console(new CompactJsonFormatter())
-    .CreateLogger();
 
 var resourceBuilder = ResourceBuilder.CreateDefault()
     .AddService("OpenMatchFunction")
@@ -20,7 +16,17 @@ var resourceBuilder = ResourceBuilder.CreateDefault()
 
 var builder = WebApplication.CreateSlimBuilder(args);	 // .net 8 + AOT supported
 
-builder.Host.UseSerilog();
+builder.Logging.ClearProviders();
+builder.Logging.AddOpenTelemetry(opts =>
+{
+    opts.SetResourceBuilder(resourceBuilder);
+    opts.IncludeScopes = true;
+    opts.IncludeFormattedMessage = true;
+    opts.AddOtlpExporter(export =>
+    {
+        export.Endpoint = new Uri("http://localhost:4317");
+    });
+});
 builder.Services.AddExceptionHandler<DefaultExceptionHandler>();
 builder.Services.AddHttpContextAccessor();
 builder.Services
@@ -55,14 +61,15 @@ builder.Services.AddOpenTelemetry()
         
         opts.AddOtlpExporter(export =>
         {
-            export.Endpoint = new Uri("http://otel");
+            export.Endpoint = new Uri("http://localhost:4317");
             export.Protocol = OtlpExportProtocol.HttpProtobuf;
         });
     })
     .WithTracing(opts =>
     {
         opts.SetResourceBuilder(resourceBuilder);
-        opts.SetSampler(new TraceIdRatioBasedSampler(0.1f));
+        opts.SetSampler(new AlwaysOnSampler());
+        //opts.SetSampler(new TraceIdRatioBasedSampler(0.1f));
         
         opts.AddHttpClientInstrumentation()
             .AddAspNetCoreInstrumentation()
@@ -70,7 +77,7 @@ builder.Services.AddOpenTelemetry()
         
         opts.AddOtlpExporter(export =>
         {
-            export.Endpoint = new Uri("http://otel");
+            export.Endpoint = new Uri("http://localhost:4317");
             export.Protocol = OtlpExportProtocol.HttpProtobuf;
         });
     });
@@ -85,7 +92,6 @@ if (app.Environment.IsDevelopment()) {
     });*/
 }
 
-app.UseSerilogRequestLogging();
 app.MapGrpcService<MatchFunctionRunService>();
 app.MapGrpcHealthChecksService();
 
