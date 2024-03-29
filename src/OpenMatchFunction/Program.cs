@@ -3,6 +3,7 @@ using OpenMatchFunction.Configurations;
 using OpenMatchFunction.Interceptors;
 using OpenMatchFunction.OM;
 using OpenMatchFunction.Exceptions;
+using OpenMatchFunction.Options;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
@@ -15,6 +16,9 @@ var resourceBuilder = ResourceBuilder.CreateDefault()
     .AddTelemetrySdk();
 
 var builder = WebApplication.CreateSlimBuilder(args);	 // .net 8 + AOT supported
+
+builder.Services.AddOptions<OpenTelemetryOptions>();
+builder.Services.AddOptions<OpenMatchOptions>();
 
 builder.Logging.ClearProviders();
 builder.Logging.AddOpenTelemetry(opts =>
