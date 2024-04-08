@@ -8,5 +8,8 @@ public sealed class OpenTelemetryOptions
 
     public string EndpointType { get; init; } = "otlp";
 
+    // OpenTelemetry rate to sample traces
+    public float SamplingRate { get; init; } = 0.1f;
+
     public string Endpoint { get; init; } = "http://localhost:4317";
 }
