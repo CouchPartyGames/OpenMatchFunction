@@ -16,6 +16,13 @@ var resourceBuilder = ResourceBuilder.CreateDefault()
 
 var builder = WebApplication.CreateSlimBuilder(args);	 // .net 8 + AOT supported
 
+    // Enable Experimental Support for gRPC Traces
+builder.Configuration.AddInMemoryCollection(
+    new Dictionary<string, string?>
+    {
+        ["OTEL_DOTNET_EXPERIMENTAL_ASPNETCORE_ENABLE_GRPC_INSTRUMENTATION"] = "true",
+    });
+
 builder.Logging.ClearProviders();
 builder.Logging.AddOpenTelemetry(opts =>
 {
