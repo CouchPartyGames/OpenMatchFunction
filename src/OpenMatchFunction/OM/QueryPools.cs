@@ -9,8 +9,6 @@ public record TicketsInPool(string Name, RepeatedField<Ticket> Tickets);
 
 public sealed class QueryPools(QueryService.QueryServiceClient client)
 {
-    private readonly QueryService.QueryServiceClient _client = client;
-
     public async Task<TicketsInPool> QuerySinglePool(Pool pool)
     {
         RepeatedField<Ticket> tickets = new();
@@ -19,7 +17,7 @@ public sealed class QueryPools(QueryService.QueryServiceClient client)
             Pool = pool
             
         };
-        using var call = _client.QueryTickets(request, deadline: DateTime.UtcNow.AddSeconds(5));
+        using var call = client.QueryTickets(request, deadline: DateTime.UtcNow.AddSeconds(5));
         await foreach (var response in call.ResponseStream.ReadAllAsync())
         {
             tickets.Add(response.Tickets);

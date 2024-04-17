@@ -1,18 +1,14 @@
+using OpenMatchFunction;
 using OpenMatchFunction.Services;
 using OpenMatchFunction.Configurations;
 using OpenMatchFunction.Interceptors;
 using OpenMatchFunction.OM;
 using OpenMatchFunction.Exceptions;
+using OpenMatchFunction.Options;
 using OpenTelemetry.Resources;
-using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Trace;
 
 
-var resourceBuilder = ResourceBuilder.CreateDefault()
-    .AddService("OpenMatchFunction")
-    .AddTelemetrySdk();
 
 var builder = WebApplication.CreateSlimBuilder(args);	 // .net 8 + AOT supported
 
@@ -24,6 +20,16 @@ builder.Configuration.AddInMemoryCollection(
     });
 
 builder.Logging.ClearProviders();
+
+var resourceBuilder = ResourceBuilder.CreateDefault()
+    .AddService("OpenMatchFunction")
+    .AddTelemetrySdk();
+
+builder.Services.Configure<OpenMatchOptions>(
+    builder.Configuration.GetSection(OpenMatchOptions.SectionName));
+builder.Services.Configure<OpenTelemetryOptions>(
+    builder.Configuration.GetSection(OpenTelemetryOptions.SectionName));
+
 builder.Logging.AddOpenTelemetry(opts =>
 {
     opts.SetResourceBuilder(resourceBuilder);
@@ -58,37 +64,7 @@ builder.Services
     .AddInterceptor<ClientLoggerInterceptor>()
     .AddStandardResilienceHandler();
 
-builder.Services.AddOpenTelemetry()
-    .WithMetrics(opts =>
-    {
-        opts.SetResourceBuilder(resourceBuilder);
-        opts.AddHttpClientInstrumentation()
-            .AddAspNetCoreInstrumentation()
-            .AddRuntimeInstrumentation();
-        
-        opts.AddOtlpExporter(export =>
-        {
-            export.Endpoint = new Uri("http://localhost:4317");
-            export.Protocol = OtlpExportProtocol.HttpProtobuf;
-        });
-    })
-    .WithTracing(opts =>
-    {
-        opts.SetResourceBuilder(resourceBuilder);
-        opts.SetSampler(new AlwaysOnSampler());
-        //opts.SetSampler(new TraceIdRatioBasedSampler(0.1f));
-        
-        opts.AddHttpClientInstrumentation()
-            .AddAspNetCoreInstrumentation()
-            .AddGrpcClientInstrumentation();
-        
-        opts.AddOtlpExporter(export =>
-        {
-            export.Endpoint = new Uri("http://localhost:4317");
-            export.Protocol = OtlpExportProtocol.HttpProtobuf;
-        });
-    });
-
+builder.Services.AddObservability(builder.Configuration);
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment()) {

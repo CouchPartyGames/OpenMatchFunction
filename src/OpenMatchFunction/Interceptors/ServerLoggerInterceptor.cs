@@ -1,14 +1,7 @@
 ﻿namespace OpenMatchFunction.Interceptors;
 
-public sealed class ServerLoggerInterceptor : Interceptor
+public sealed class ServerLoggerInterceptor(ILogger<ServerLoggerInterceptor> logger) : Interceptor
 {
-    private readonly ILogger<ServerLoggerInterceptor> _logger;
-    
-    public ServerLoggerInterceptor(ILogger<ServerLoggerInterceptor> logger)
-    {
-        _logger = logger;
-    }
-    
     public override async Task<TResponse> UnaryServerHandler<TRequest, TResponse>(TRequest request, 
         ServerCallContext context,
         UnaryServerMethod<TRequest, TResponse> continuation)
@@ -19,7 +12,8 @@ public sealed class ServerLoggerInterceptor : Interceptor
         }
         catch (Exception ex)
         {
-            _logger.LogError($"Failure {ex.Message}");
+            ServerLoggerInterceptorLog.ServerErrorResponse(logger);
+            logger.LogError($"Failure {ex.Message}");
             throw;
         }
     }
@@ -46,4 +40,15 @@ public sealed class ServerLoggerInterceptor : Interceptor
         
         return base.DuplexStreamingServerHandler(requestStream, responseStream, context, continuation);
     }
+}
+
+
+public static partial class ServerLoggerInterceptorLog
+{
+    [LoggerMessage(
+        EventId = 0,
+        Level = LogLevel.Error,
+        Message = "Server failed")]
+    public static partial void ServerErrorResponse(
+        ILogger logger);
 }

@@ -1,12 +1,8 @@
 ﻿namespace OpenMatchFunction.Interceptors;
 
-public class ExceptionInterceptor : Interceptor
+public class ExceptionInterceptor(ILogger<ExceptionInterceptor> logger) : Interceptor
 {
-   private readonly ILogger<ExceptionInterceptor> _logger;
-   public ExceptionInterceptor(ILogger<ExceptionInterceptor> logger)
-   {
-      _logger = logger;
-   }
+   private readonly ILogger<ExceptionInterceptor> _logger = logger;
 
    public override AsyncServerStreamingCall<TResponse> AsyncServerStreamingCall<TRequest, TResponse>(TRequest request,
       ClientInterceptorContext<TRequest, TResponse> context, AsyncServerStreamingCallContinuation<TRequest, TResponse> continuation)
@@ -30,7 +26,7 @@ public class ExceptionInterceptor : Interceptor
    }*/
 }
 
-/*
+
 public static partial class InterceptorErrors
 {
    [LoggerMessage(EventId = 0, Level = LogLevel.Error, Message = "Timeout")]
@@ -38,4 +34,4 @@ public static partial class InterceptorErrors
 
    [LoggerMessage(EventId = 1, Level = LogLevel.Error, Message = "gRPC Error")]
    public static partial void RpcError(ILogger logger);
-}*/
+}
