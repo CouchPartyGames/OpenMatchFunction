@@ -13,6 +13,7 @@ public static class Observability
         IConfiguration configuration/*,
         ILogger logger*/)
     {
+        const OtlpExportProtocol otelProtocol = OtlpExportProtocol.Grpc;
         var openTelemetryOptions = configuration
             .GetSection(OpenTelemetryOptions.SectionName)
             .Get<OpenTelemetryOptions>();
@@ -25,7 +26,7 @@ public static class Observability
         var resourceBuilder = ResourceBuilder.CreateDefault()
             .AddService("OpenMatchFunction")
             .AddTelemetrySdk();
-        
+
         services.AddOpenTelemetry()
             .WithMetrics(opts =>
             {
@@ -37,7 +38,7 @@ public static class Observability
                 opts.AddOtlpExporter(export =>
                 {
                     export.Endpoint = new Uri(openTelemetryOptions.Endpoint);
-                    export.Protocol = OtlpExportProtocol.HttpProtobuf;
+                    export.Protocol = otelProtocol;
                 });
             })
             .WithTracing(opts =>
@@ -52,7 +53,7 @@ public static class Observability
                 opts.AddOtlpExporter(export =>
                 {
                     export.Endpoint = new Uri(openTelemetryOptions.Endpoint);
-                    export.Protocol = OtlpExportProtocol.HttpProtobuf;
+                    export.Protocol = otelProtocol;
                 });
             });
             services.AddSingleton<OpenMatchFunctionMetrics>();

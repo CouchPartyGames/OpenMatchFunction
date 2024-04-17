@@ -5,6 +5,7 @@ using OpenMatchFunction.Interceptors;
 using OpenMatchFunction.OM;
 using OpenMatchFunction.Exceptions;
 using OpenMatchFunction.Options;
+using OpenTelemetry.Exporter;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Logs;
 
@@ -38,6 +39,7 @@ builder.Logging.AddOpenTelemetry(opts =>
     opts.AddOtlpExporter(export =>
     {
         export.Endpoint = new Uri("http://localhost:4317");
+        export.Protocol = OtlpExportProtocol.Grpc;
     });
 });
 builder.Services.AddExceptionHandler<DefaultExceptionHandler>();
