@@ -45,13 +45,16 @@ builder.Logging.AddOpenTelemetry(opts =>
     });
 });
 
-
-
 builder.Services.AddExceptionHandler<DefaultExceptionHandler>();
 builder.Services.AddHttpContextAccessor();
+
+    // Add gRPC Service
 builder.Services
-    .AddGrpcService()
-    .AddHealthChecksService();
+    .AddGrpcService();
+
+    // Health Check
+builder.Services.AddGrpcHealthChecks()
+    .AddCheck("OpenMatchFunction", () => HealthCheckResult.Healthy(), new[] { "grpc", "live"} );
 
     // Clients
 builder.Services

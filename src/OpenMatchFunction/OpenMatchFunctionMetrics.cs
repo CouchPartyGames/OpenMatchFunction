@@ -2,7 +2,9 @@ using System.Diagnostics.Metrics;
 
 namespace OpenMatchFunction;
 
-public sealed class OpenMatchFunctionMetrics
+public interface IOpenMatchFunctionMetrics;
+
+public sealed class OpenMatchFunctionMetrics : IOpenMatchFunctionMetrics
 {
     private readonly Counter<int> _matchesMade;
     
