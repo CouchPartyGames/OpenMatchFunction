@@ -10,7 +10,8 @@ namespace OpenMatchFunction.Configurations;
 public static class Observability
 {
     public static IServiceCollection AddObservability(this IServiceCollection services, 
-        IConfiguration configuration/*,
+        IConfiguration configuration,
+        ResourceBuilder resourceBuilder /*,
         ILogger logger*/)
     {
         const OtlpExportProtocol otelProtocol = OtlpExportProtocol.Grpc;
@@ -22,10 +23,6 @@ public static class Observability
             //logger.LogError("Null reference for OpenTelemetry options");
             return services;
         }
-        
-        var resourceBuilder = ResourceBuilder.CreateDefault()
-            .AddService("OpenMatchFunction")
-            .AddTelemetrySdk();
 
         services.AddOpenTelemetry()
             .WithMetrics(opts =>
@@ -61,3 +58,4 @@ public static class Observability
         return services;
     }
 }
+

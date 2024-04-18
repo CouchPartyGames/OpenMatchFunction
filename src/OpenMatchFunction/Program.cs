@@ -13,24 +13,26 @@ using OpenTelemetry.Logs;
 
 var builder = WebApplication.CreateSlimBuilder(args);	 // .net 8 + AOT supported
 
+
+
+var resourceBuilder = ResourceBuilder.CreateDefault()
+    .AddService("OpenMatchFunction", null, "1.0.0")
+    .AddTelemetrySdk();
+
+    // Configuration
     // Enable Experimental Support for gRPC Traces
 builder.Configuration.AddInMemoryCollection(
     new Dictionary<string, string?>
     {
         ["OTEL_DOTNET_EXPERIMENTAL_ASPNETCORE_ENABLE_GRPC_INSTRUMENTATION"] = "true",
     });
-
-builder.Logging.ClearProviders();
-
-var resourceBuilder = ResourceBuilder.CreateDefault()
-    .AddService("OpenMatchFunction")
-    .AddTelemetrySdk();
-
 builder.Services.Configure<OpenMatchOptions>(
     builder.Configuration.GetSection(OpenMatchOptions.SectionName));
 builder.Services.Configure<OpenTelemetryOptions>(
     builder.Configuration.GetSection(OpenTelemetryOptions.SectionName));
 
+    // Logging
+builder.Logging.ClearProviders();
 builder.Logging.AddOpenTelemetry(opts =>
 {
     opts.SetResourceBuilder(resourceBuilder);
@@ -42,12 +44,16 @@ builder.Logging.AddOpenTelemetry(opts =>
         export.Protocol = OtlpExportProtocol.Grpc;
     });
 });
+
+
+
 builder.Services.AddExceptionHandler<DefaultExceptionHandler>();
 builder.Services.AddHttpContextAccessor();
 builder.Services
     .AddGrpcService()
     .AddHealthChecksService();
 
+    // Clients
 builder.Services
     .AddGrpcClient<QueryService.QueryServiceClient>(Constants.OpenMatchQuery, o => {
         var host = builder.Configuration["OPENMATCH_QUERY_HOST"] ?? "https://open-match-query.open-match.svc.cluster.local:50503";
@@ -66,7 +72,8 @@ builder.Services
     .AddInterceptor<ClientLoggerInterceptor>()
     .AddStandardResilienceHandler();
 
-builder.Services.AddObservability(builder.Configuration);
+    // Observability (OpenTelemetry Traces + Metrics)
+builder.Services.AddObservability(builder.Configuration, resourceBuilder);
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment()) {
