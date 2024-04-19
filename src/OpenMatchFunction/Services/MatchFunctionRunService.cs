@@ -8,15 +8,17 @@ public interface IMatchFunctionRunService;
 public class MatchFunctionRunService : MatchFunction.MatchFunctionBase, IMatchFunctionRunService
 {
 	private readonly QueryService.QueryServiceClient _queryClient;
+	private readonly OpenMatchFunctionMetrics _metrics;
 
 	private const string MatchFunctionName = "basic-match";
 
-	private QueryPools _queryPools;
+	private readonly QueryPools _queryPools;
 
-	public MatchFunctionRunService(GrpcClientFactory grpcClientFactory)
+	public MatchFunctionRunService(GrpcClientFactory grpcClientFactory, OpenMatchFunctionMetrics metrics)
 	{
-		 _queryClient = grpcClientFactory.CreateClient<QueryService.QueryServiceClient>(Constants.OpenMatchQuery);
-		 _queryPools = new QueryPools(_queryClient);
+		_metrics = metrics;
+		_queryClient = grpcClientFactory.CreateClient<QueryService.QueryServiceClient>(Constants.OpenMatchQuery); 
+		_queryPools = new QueryPools(_queryClient);
 	}
 
     public override async Task Run(RunRequest request, IServerStreamWriter<RunResponse> responseStream, ServerCallContext context)
