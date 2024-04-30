@@ -1,3 +1,4 @@
+using Grpc.Core;
 using NSubstitute.ReturnsExtensions;
 using OpenMatch;
 using OpenMatchFunction.Services;
@@ -7,11 +8,22 @@ namespace OpenMatchFunction.Tests.Unit;
 
 public class MatchFunctionRunServiceTests
 {
-    private IMatchFunctionRunService _sut;
-    /*
-    public UnitTest1()
+    private readonly IMatchFunctionRunService _sut;
+    
+    public MatchFunctionRunServiceTests()
     {
-        _sut = new MatchFunctionRunService();
+        var mockClient = Substitute.For<QueryService.QueryServiceClient>("hello");
+        //mockClient.QueryTickets().ResponseStream.ReadAllAsync().;
+        
+        /*
+        mockClient
+            .Setup(m => m.SayHelloUnaryAsync(
+                It.IsAny<HelloRequest>(), null, null, CancellationToken.None))
+            .Returns(mockCall);
+            */
+        
+        var metrics = Substitute.For<IOpenMatchFunctionMetrics>();
+        //_sut = new MatchFunctionRunService(mockClient, metrics);
     }
     
     [Fact]
@@ -19,14 +31,14 @@ public class MatchFunctionRunServiceTests
     {
         // Arrange
         var request = new RunRequest();
-        var callContext = TestServerCallContext.Create();
+        var callContext = new TestServerCallContext(new Metadata(), new CancellationToken());
         var expectedResponse = new RunResponse();
         
         // Act
-        var actualResponse = _sut.ReturnsNull()
+        //var actualResponse = _sut.Run();
             
         // Assert
-        actualResponse.Should().BeEquivalentTo(expectedResponse);
+        //actualResponse.Should().BeEquivalentTo(expectedResponse);
     }
-    */
+    
 }

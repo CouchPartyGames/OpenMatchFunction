@@ -1,6 +1,7 @@
 namespace OpenMatchFunction.Configurations;
 
-public class GrpcClients
+public static class GrpcClients
 {
+    
     
 }

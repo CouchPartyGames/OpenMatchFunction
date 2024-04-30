@@ -7,7 +7,7 @@ public class TestServerCallContext : ServerCallContext
     private readonly Metadata _metadata;
     private readonly CancellationToken _cancellationToken;
 
-    private TestServerCallContext(Metadata metadata, CancellationToken cancellationToken)
+    public TestServerCallContext(Metadata metadata, CancellationToken cancellationToken)
     {
         _metadata = metadata;
         _cancellationToken = cancellationToken;
