@@ -1,14 +1,14 @@
 using System.Diagnostics.Metrics;
 
-namespace OpenMatchFunction;
+namespace OpenMatchFunction.Observability;
 
 public interface IOpenMatchFunctionMetrics;
 
-public sealed class OpenMatchFunctionMetrics : IOpenMatchFunctionMetrics
+public sealed class OtelMetrics : IOpenMatchFunctionMetrics
 {
     private readonly Counter<int> _matchesMade;
     
-    public OpenMatchFunctionMetrics(IMeterFactory factory)
+    public OtelMetrics(IMeterFactory factory)
     {
         var meter = factory.Create("OpenMatchFunction");
 

@@ -1,82 +1,30 @@
+using OpenMatchFunction.Clients.OpenMatchPool;
 using OpenMatchFunction.Services;
-using OpenMatchFunction.Configurations;
-using OpenMatchFunction.Interceptors;
-using OpenMatchFunction.OM;
-using OpenMatchFunction.Exceptions;
-using OpenMatchFunction.Options;
-using OpenTelemetry.Exporter;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Logs;
-
+using OpenMatchFunction.Observability;
 
 
 var builder = WebApplication.CreateSlimBuilder(args);	 // .net 8 + AOT supported
 
-
-
-var resourceBuilder = ResourceBuilder.CreateDefault()
-    .AddService("OpenMatchFunction", null, "1.0.0")
-    .AddTelemetrySdk();
-
     // Configuration
-    // Enable Experimental Support for gRPC Traces
+    // Enable Experimental Support for gRPC Traces (this might not be necessary anymore)
 builder.Configuration.AddInMemoryCollection(
     new Dictionary<string, string?>
     {
         ["OTEL_DOTNET_EXPERIMENTAL_ASPNETCORE_ENABLE_GRPC_INSTRUMENTATION"] = "true",
     });
-builder.Services.Configure<OpenMatchOptions>(
-    builder.Configuration.GetSection(OpenMatchOptions.SectionName));
-builder.Services.Configure<OpenTelemetryOptions>(
-    builder.Configuration.GetSection(OpenTelemetryOptions.SectionName));
 
-    // Logging
-builder.Logging.ClearProviders();
-builder.Logging.AddOpenTelemetry(opts =>
-{
-    opts.SetResourceBuilder(resourceBuilder);
-    opts.IncludeScopes = true;
-    opts.IncludeFormattedMessage = true;
-    opts.AddOtlpExporter(export =>
-    {
-        export.Endpoint = new Uri(Constants.OTEL_DEFAULT_HOST);
-        export.Protocol = OtlpExportProtocol.Grpc;
-    });
-});
+    // Add Observability
+builder.Logging.AddObservabilityLogging(builder.Configuration, OtelResourceBuilder.ResourceBuilder);
+builder.Services.AddObservabilityMetrics(builder.Configuration, OtelResourceBuilder.ResourceBuilder);
+builder.Services.AddObservabilityTracing(builder.Configuration, OtelResourceBuilder.ResourceBuilder);
 
-builder.Services.AddExceptionHandler<DefaultExceptionHandler>();
-builder.Services.AddHttpContextAccessor();
+    // Add Clients
+builder.Services.AddOpenMatchQueryPoolClient(builder.Configuration);
 
-    // Add gRPC Service
-builder.Services
-    .AddGrpcService();
+    // Add Service (gRPC)
+builder.Services.AddGrpcService(builder.Configuration);
+builder.Services.AddServiceHealthCheck();
 
-    // Health Check
-builder.Services.AddGrpcHealthChecks()
-    .AddCheck("OpenMatchFunction", () => HealthCheckResult.Healthy(), new[] { "grpc", "live"} );
-
-    // Clients
-builder.Services
-    .AddGrpcClient<QueryService.QueryServiceClient>(Constants.OpenMatchQuery, o =>
-    {
-        var host = builder.Configuration["OPENMATCH_QUERY_HOST"] ?? Constants.OpenMatchQueryHost;
-        o.Address = new Uri(host);
-    }).ConfigureChannel(o =>
-    {
-        o.HttpHandler = new SocketsHttpHandler()
-        {
-            PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
-            KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
-            KeepAlivePingDelay = TimeSpan.FromSeconds(60),
-            EnableMultipleHttp2Connections = true
-        };
-        o.MaxRetryAttempts = 4;
-    })
-    .AddInterceptor<ClientLoggerInterceptor>()
-    .AddStandardResilienceHandler();
-
-    // Observability (OpenTelemetry Traces + Metrics)
-builder.Services.AddObservability(builder.Configuration);
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment()) {
@@ -89,7 +37,4 @@ if (app.Environment.IsDevelopment()) {
 
 app.MapGrpcService<MatchFunctionRunService>();
 app.MapGrpcHealthChecksService();
-
 app.Run();
-
-public partial class Program { }

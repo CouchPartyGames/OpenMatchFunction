@@ -1,4 +1,4 @@
-namespace OpenMatchFunction.OM;
+namespace OpenMatchFunction.Utilities.OpenMatch;
 
 public sealed class Matches
 {
