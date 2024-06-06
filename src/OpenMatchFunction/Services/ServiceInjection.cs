@@ -2,11 +2,17 @@
 using OpenMatchFunction.Interceptors;
 using Microsoft.OpenApi.Models;
 
-namespace OpenMatchFunction.Configurations;
+namespace OpenMatchFunction.Services;
 
-public static class ServiceCollections {
+public static class ServiceInjection {
 
-    public static IServiceCollection AddGrpcService(this IServiceCollection services) {
+    public static IServiceCollection AddGrpcService(this IServiceCollection services,
+        IConfiguration configuration) {
+        
+        var options = configuration
+            .GetSection(ServiceOptions.SectionName)
+            .Get<ServiceOptions>();
+        
         services
             .AddGrpc(o =>
             {
@@ -19,12 +25,8 @@ public static class ServiceCollections {
             })
             .AddJsonTranscoding();
 
-        return services;
-    }
-
-    public static IServiceCollection AddHealthChecksService(this IServiceCollection services) {
-        services.AddGrpcHealthChecks();
-
+        services.AddHttpContextAccessor();
+        
         return services;
     }
 

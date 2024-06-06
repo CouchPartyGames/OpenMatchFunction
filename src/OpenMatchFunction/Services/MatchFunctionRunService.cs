@@ -1,30 +1,33 @@
-﻿namespace OpenMatchFunction.Services;
+﻿using OpenMatchFunction.Options;
+using OpenMatchFunction.Utilities.OpenMatch;
+
+namespace OpenMatchFunction.Services;
 
 using OpenMatch;
-using OpenMatchFunction.OM;
+using OpenMatchFunction.Observability;
 
 public interface IMatchFunctionRunService;
 
 public class MatchFunctionRunService : MatchFunction.MatchFunctionBase, IMatchFunctionRunService
 {
 	private readonly QueryService.QueryServiceClient _queryClient;
-	private readonly OpenMatchFunctionMetrics _metrics;
+	private readonly OtelMetrics _metrics;
 
 	private const string MatchFunctionName = "basic-match";
 
 	private readonly QueryPools _queryPools;
 
-	public MatchFunctionRunService(GrpcClientFactory grpcClientFactory, OpenMatchFunctionMetrics metrics)
+	public MatchFunctionRunService(GrpcClientFactory grpcClientFactory, OtelMetrics metrics)
 	{
 		_metrics = metrics;
-		_queryClient = grpcClientFactory.CreateClient<QueryService.QueryServiceClient>(Constants.OpenMatchQuery); 
+		_queryClient = grpcClientFactory.CreateClient<QueryService.QueryServiceClient>(OpenMatchOptions.OpenMatchQuery); 
 		_queryPools = new QueryPools(_queryClient);
 	}
 
     public override async Task Run(RunRequest request, IServerStreamWriter<RunResponse> responseStream, ServerCallContext context)
     {
 	    List<TicketsInPool> tickets = new();
-	    using (var activity = Telemetry.ActivitySource.StartActivity("RunRequest"))
+	    using (var activity = OtelTracing.ActivitySource.StartActivity("RunRequest"))
 	    {
 		    var shouldThrow = false;
 		    if (shouldThrow)
@@ -32,7 +35,7 @@ public class MatchFunctionRunService : MatchFunction.MatchFunctionBase, IMatchFu
 			    throw new RpcException(new Status(StatusCode.InvalidArgument, "Name is required."));
 		    }
 
-		    using (Telemetry.ActivitySource.StartActivity("FetchTickets"))
+		    using (OtelTracing.ActivitySource.StartActivity("FetchTickets"))
 		    {
 			    // Fetch Tickets from Pools
 			    tickets = _queryPools.QueryMultiplePools(request.Profile.Pools);

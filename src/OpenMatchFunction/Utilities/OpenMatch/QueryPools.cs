@@ -1,9 +1,6 @@
-﻿using System.Threading.Tasks;
-using System.Threading;
-using Google.Protobuf;
-using Google.Protobuf.Collections;
+﻿using Google.Protobuf.Collections;
 
-namespace OpenMatchFunction.OM;
+namespace OpenMatchFunction.Utilities.OpenMatch;
 
 public record TicketsInPool(string Name, RepeatedField<Ticket> Tickets);
 

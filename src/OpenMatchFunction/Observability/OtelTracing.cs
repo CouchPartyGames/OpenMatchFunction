@@ -1,8 +1,8 @@
 using System.Diagnostics;
 
-namespace OpenMatchFunction;
+namespace OpenMatchFunction.Observability;
 
-public static class Telemetry
+public static class OtelTracing
 {
     public static readonly ActivitySource ActivitySource = new("OpenMatchFunction", "1.0.0");
 }
