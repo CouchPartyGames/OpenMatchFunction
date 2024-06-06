@@ -39,7 +39,7 @@ builder.Logging.AddOpenTelemetry(opts =>
     opts.IncludeFormattedMessage = true;
     opts.AddOtlpExporter(export =>
     {
-        export.Endpoint = new Uri("http://localhost:4317");
+        export.Endpoint = new Uri(Constants.OTEL_DEFAULT_HOST);
         export.Protocol = OtlpExportProtocol.Grpc;
     });
 });
@@ -57,8 +57,9 @@ builder.Services.AddGrpcHealthChecks()
 
     // Clients
 builder.Services
-    .AddGrpcClient<QueryService.QueryServiceClient>(Constants.OpenMatchQuery, o => {
-        var host = builder.Configuration["OPENMATCH_QUERY_HOST"] ?? "https://open-match-query.open-match.svc.cluster.local:50503";
+    .AddGrpcClient<QueryService.QueryServiceClient>(Constants.OpenMatchQuery, o =>
+    {
+        var host = builder.Configuration["OPENMATCH_QUERY_HOST"] ?? Constants.OpenMatchQueryHost;
         o.Address = new Uri(host);
     }).ConfigureChannel(o =>
     {
@@ -75,7 +76,7 @@ builder.Services
     .AddStandardResilienceHandler();
 
     // Observability (OpenTelemetry Traces + Metrics)
-builder.Services.AddObservability(builder.Configuration, resourceBuilder);
+builder.Services.AddObservability(builder.Configuration);
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment()) {

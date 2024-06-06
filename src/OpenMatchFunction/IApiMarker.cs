@@ -1,5 +1,3 @@
 namespace OpenMatchFunction;
 
-public interface IApiMarker
-{
-}
+public interface IApiMarker;

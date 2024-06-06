@@ -10,9 +10,8 @@ namespace OpenMatchFunction.Configurations;
 public static class Observability
 {
     public static IServiceCollection AddObservability(this IServiceCollection services, 
-        IConfiguration configuration,
-        ResourceBuilder resourceBuilder /*,
-        ILogger logger*/)
+        IConfiguration configuration
+        /*ILogger logger*/)
     {
         const OtlpExportProtocol otelProtocol = OtlpExportProtocol.Grpc;
         var openTelemetryOptions = configuration
@@ -25,9 +24,10 @@ public static class Observability
         }
 
         services.AddOpenTelemetry()
+            .ConfigureResource(resourceBuilder => resourceBuilder.AddService("OpenMatchFunction", null, "1.0.0"))
             .WithMetrics(opts =>
             {
-                opts.SetResourceBuilder(resourceBuilder);
+                //opts.SetResourceBuilder(resourceBuilder);
                 opts.AddHttpClientInstrumentation()
                     .AddAspNetCoreInstrumentation()
                     .AddRuntimeInstrumentation();
@@ -40,7 +40,7 @@ public static class Observability
             })
             .WithTracing(opts =>
             {
-                opts.SetResourceBuilder(resourceBuilder);
+                //opts.SetResourceBuilder(resourceBuilder);
                 opts.SetSampler(new TraceIdRatioBasedSampler(openTelemetryOptions.SamplingRate));
 
                 opts.AddHttpClientInstrumentation()
