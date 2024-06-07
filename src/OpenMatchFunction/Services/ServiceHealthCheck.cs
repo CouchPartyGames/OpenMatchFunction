@@ -9,6 +9,4 @@ public static class ServiceHealthCheck
         
         return services;
     }
-    
-    
 }
