@@ -15,7 +15,7 @@ public static class TracingInjection
             .GetSection(OpenTelemetryOptions.SectionName)
             .Get<OpenTelemetryOptions>();
         
-        const float samplingRate = 1.0f;
+        const float samplingRate = 0.1f;
         const string endpoint = OpenTelemetryOptions.OtelDefaultHost;
         const OtlpExportProtocol otelProtocol = OtlpExportProtocol.Grpc;
         

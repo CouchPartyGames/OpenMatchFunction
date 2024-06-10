@@ -1,3 +1,4 @@
+using OpenMatchFunction.Observability.Options;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 
@@ -10,6 +11,10 @@ public static class LoggingInjection
         IConfiguration configuration,
         ResourceBuilder resourceBuilder)
     {
+        var options = configuration
+            .GetSection(OpenTelemetryOptions.SectionName)
+            .Get<OpenTelemetryOptions>();
+        
         // Logging
         loggingBuilder.ClearProviders();
         loggingBuilder.AddOpenTelemetry(opts =>

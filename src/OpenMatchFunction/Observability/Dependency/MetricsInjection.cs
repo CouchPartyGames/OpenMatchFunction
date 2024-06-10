@@ -11,7 +11,7 @@ public static class MetricsInjection
         IConfiguration configuration,
         ResourceBuilder resourceBuilder)
     {
-        var openTelemetryOptions = configuration
+        var options = configuration
             .GetSection(OpenTelemetryOptions.SectionName)
             .Get<OpenTelemetryOptions>();
         
