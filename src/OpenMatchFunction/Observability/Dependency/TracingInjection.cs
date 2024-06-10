@@ -1,13 +1,13 @@
-using OpenMatchFunction.Options;
+using OpenMatchFunction.Observability.Options;
 using OpenTelemetry.Exporter;
-using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
-namespace OpenMatchFunction.Observability;
+namespace OpenMatchFunction.Observability.Dependency;
 
-public static class MetricsInjection
+public static class TracingInjection
 {
-    public static IServiceCollection AddObservabilityMetrics(this IServiceCollection services,
+    public static IServiceCollection AddObservabilityTracing(this IServiceCollection services,
         IConfiguration configuration,
         ResourceBuilder resourceBuilder)
     {
@@ -15,25 +15,26 @@ public static class MetricsInjection
             .GetSection(OpenTelemetryOptions.SectionName)
             .Get<OpenTelemetryOptions>();
         
-        const OtlpExportProtocol otelProtocol = OtlpExportProtocol.Grpc;
+        const float samplingRate = 1.0f;
         const string endpoint = OpenTelemetryOptions.OtelDefaultHost;
+        const OtlpExportProtocol otelProtocol = OtlpExportProtocol.Grpc;
         
         services.AddOpenTelemetry()
-            .WithMetrics(opts =>
+            .WithTracing(opts =>
             {
                 opts.SetResourceBuilder(resourceBuilder);
+                opts.SetSampler(new TraceIdRatioBasedSampler(samplingRate));
+
                 opts.AddHttpClientInstrumentation()
                     .AddAspNetCoreInstrumentation()
-                    .AddRuntimeInstrumentation();
-
+                    .AddGrpcClientInstrumentation();
+                
                 opts.AddOtlpExporter(export =>
                 {
                     export.Endpoint = new Uri(endpoint);
                     export.Protocol = otelProtocol;
                 });
             });
-        
         return services;
     }
-
 }

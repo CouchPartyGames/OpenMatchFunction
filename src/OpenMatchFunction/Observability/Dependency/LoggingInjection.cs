@@ -1,9 +1,7 @@
-using OpenMatchFunction.Options;
-using OpenTelemetry.Exporter;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
 
-namespace OpenMatchFunction.Observability;
+namespace OpenMatchFunction.Observability.Dependency;
 
 public static class LoggingInjection
 {
@@ -19,11 +17,13 @@ public static class LoggingInjection
             opts.SetResourceBuilder(resourceBuilder);
             opts.IncludeScopes = true;
             opts.IncludeFormattedMessage = true;
-            opts.AddOtlpExporter(export =>
+            opts.AddConsoleExporter();
+            
+            /*opts.AddOtlpExporter(export =>
             {
                 export.Endpoint = new Uri(OpenTelemetryOptions.OtelDefaultHost);
                 export.Protocol = OtlpExportProtocol.Grpc;
-            });
+            });*/
         });
         return loggingBuilder;
     }

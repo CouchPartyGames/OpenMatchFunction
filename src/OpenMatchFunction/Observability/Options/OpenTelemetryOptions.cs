@@ -1,4 +1,4 @@
-﻿namespace OpenMatchFunction.Options;
+﻿namespace OpenMatchFunction.Observability.Options;
 
 public sealed class OpenTelemetryOptions
 {

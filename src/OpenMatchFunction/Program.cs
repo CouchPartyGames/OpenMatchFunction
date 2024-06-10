@@ -1,6 +1,7 @@
 using OpenMatchFunction.Clients.OpenMatchPool;
 using OpenMatchFunction.Services;
 using OpenMatchFunction.Observability;
+using OpenMatchFunction.Observability.Dependency;
 
 
 var builder = WebApplication.CreateSlimBuilder(args);	 // .net 8 + AOT supported
