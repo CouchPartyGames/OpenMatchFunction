@@ -1,8 +1,8 @@
+using Microsoft.AspNetCore.HttpLogging;
 using OpenMatchFunction.Clients.OpenMatchPool;
 using OpenMatchFunction.Services;
 using OpenMatchFunction.Observability;
 using OpenMatchFunction.Observability.Dependency;
-using OpenMatchFunction.Utilities;
 
 
 var builder = WebApplication.CreateSlimBuilder(args);	 // .net 8 + AOT supported
@@ -19,6 +19,11 @@ builder.Configuration.AddInMemoryCollection(
 builder.Logging.AddObservabilityLogging(builder.Configuration, OtelResourceBuilder.ResourceBuilder);
 builder.Services.AddObservabilityMetrics(builder.Configuration, OtelResourceBuilder.ResourceBuilder);
 builder.Services.AddObservabilityTracing(builder.Configuration, OtelResourceBuilder.ResourceBuilder);
+builder.Services.AddHttpLogging(o =>
+{
+    o.LoggingFields = HttpLoggingFields.All;
+    o.CombineLogs = true;
+});
 
     // Add Clients
 builder.Services.AddOpenMatchQueryPoolClient(builder.Configuration);
