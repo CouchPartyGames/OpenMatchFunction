@@ -27,6 +27,8 @@ public static class ClientPoolInjection
             .AddInterceptor<ClientLoggerInterceptor>()
             .AddStandardResilienceHandler();
         
+        services.AddSingleton<ClientLoggerInterceptor>();
+        
         return services;
     }
 }
