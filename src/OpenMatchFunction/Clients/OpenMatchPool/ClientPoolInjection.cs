@@ -11,7 +11,7 @@ public static class ClientPoolInjection
         services
             .AddGrpcClient<QueryService.QueryServiceClient>(OpenMatchOptions.OpenMatchQuery, o =>
             {
-                var host = configuration["OPENMATCH_QUERY_HOST"] ?? OpenMatchOptions.OpenMatchQueryHost;
+                var host = configuration["OPENMATCH_QUERY_HOST"] ?? OpenMatchOptions.OpenMatchQueryDefaultHost;
                 o.Address = new Uri(host);
             }).ConfigureChannel(o =>
             {

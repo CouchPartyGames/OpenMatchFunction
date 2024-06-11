@@ -32,7 +32,8 @@ public static class MetricsInjection
                     export.Protocol = otelProtocol;
                 });
             });
-        
+
+        services.AddSingleton<OtelMetrics>();
         return services;
     }
 

@@ -6,7 +6,7 @@ public sealed class OpenMatchOptions
     
     public const string OpenMatchQuery = "OpenMatchQuery";
     
-    public const string OpenMatchQueryHost = "https://open-match-query.open-match.svc.cluster.local:50503";
+    public const string OpenMatchQueryDefaultHost = "https://open-match-query.open-match.svc.cluster.local:50503";
 
-    public string QueryHost { get; init; } = OpenMatchQueryHost;
+    public string QueryHost { get; init; } = OpenMatchQueryDefaultHost;
 }
