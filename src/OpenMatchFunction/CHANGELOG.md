@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="0.2.3"></a>
+## 0.2.3 (2024-06-11)
+
+### Bug Fixes
+
+* add missign dependency interceptor
+
 <a name="0.2.2"></a>
 ## 0.2.2 (2024-06-11)
 
