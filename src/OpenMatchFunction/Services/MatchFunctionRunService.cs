@@ -21,12 +21,12 @@ public class MatchFunctionRunService : MatchFunction.MatchFunctionBase, IMatchFu
 	{
 		_metrics = metrics;
 		_queryClient = grpcClientFactory.CreateClient<QueryService.QueryServiceClient>(OpenMatchOptions.OpenMatchQuery); 
-		_queryPools = new QueryPools(_queryClient);
+		_queryPools = new QueryPools(_queryClient, new CancellationToken());
 	}
 
     public override async Task Run(RunRequest request, IServerStreamWriter<RunResponse> responseStream, ServerCallContext context)
     {
-	    List<TicketsInPool> tickets = new();
+	    List<TicketsInPool> tickets = [];
 	    using (var activity = OtelTracing.ActivitySource.StartActivity("RunRequest"))
 	    {
 		    var shouldThrow = false;

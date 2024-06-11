@@ -15,8 +15,10 @@ public static class LoggingInjection
             .GetSection(OpenTelemetryOptions.SectionName)
             .Get<OpenTelemetryOptions>();
         
-        // Logging
         loggingBuilder.ClearProviders();
+        loggingBuilder.AddConsole();
+        //loggingBuilder.AddJsonConsole();
+        /*
         loggingBuilder.AddOpenTelemetry(opts =>
         {
             opts.SetResourceBuilder(resourceBuilder);
@@ -28,8 +30,8 @@ public static class LoggingInjection
             {
                 export.Endpoint = new Uri(OpenTelemetryOptions.OtelDefaultHost);
                 export.Protocol = OtlpExportProtocol.Grpc;
-            });*/
-        });
+            });
+        });*/
         return loggingBuilder;
     }
 

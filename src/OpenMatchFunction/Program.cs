@@ -2,6 +2,7 @@ using OpenMatchFunction.Clients.OpenMatchPool;
 using OpenMatchFunction.Services;
 using OpenMatchFunction.Observability;
 using OpenMatchFunction.Observability.Dependency;
+using OpenMatchFunction.Utilities;
 
 
 var builder = WebApplication.CreateSlimBuilder(args);	 // .net 8 + AOT supported
@@ -36,6 +37,7 @@ if (app.Environment.IsDevelopment()) {
     });*/
 }
 
+//new LogRuntime().LogRuntimeInfo();
 app.MapGrpcService<MatchFunctionRunService>();
 app.MapGrpcHealthChecksService();
 app.Run();

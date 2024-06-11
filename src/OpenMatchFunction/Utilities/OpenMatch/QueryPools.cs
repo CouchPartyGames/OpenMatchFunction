@@ -4,7 +4,8 @@ namespace OpenMatchFunction.Utilities.OpenMatch;
 
 public record TicketsInPool(string Name, RepeatedField<Ticket> Tickets);
 
-public sealed class QueryPools(QueryService.QueryServiceClient client)
+public sealed class QueryPools(QueryService.QueryServiceClient client,
+    CancellationToken token)
 {
     public async Task<TicketsInPool> QuerySinglePool(Pool pool)
     {
@@ -14,7 +15,9 @@ public sealed class QueryPools(QueryService.QueryServiceClient client)
             Pool = pool
         };
         
-        using var call = client.QueryTickets(request, deadline: DateTime.UtcNow.AddSeconds(5));
+        using var call = client.QueryTickets(request, 
+            deadline: DateTime.UtcNow.AddSeconds(5), 
+            cancellationToken: token);
         await foreach (var response in call.ResponseStream.ReadAllAsync())
         {
             tickets.Add(response.Tickets);
