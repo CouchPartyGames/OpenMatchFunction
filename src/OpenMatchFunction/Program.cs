@@ -43,6 +43,7 @@ if (app.Environment.IsDevelopment()) {
 }
 
 //new LogRuntime().LogRuntimeInfo();
+app.UseHttpLogging();
 app.MapGrpcService<MatchFunctionRunService>();
 app.MapGrpcHealthChecksService();
 app.Run();
