@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.HttpLogging;
 using OpenMatchFunction.Clients.OpenMatchPool;
 using OpenMatchFunction.Services;
 using OpenMatchFunction.Observability;
