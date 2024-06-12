@@ -19,11 +19,6 @@ builder.Configuration.AddInMemoryCollection(
 builder.Logging.AddObservabilityLogging(builder.Configuration, OtelResourceBuilder.ResourceBuilder);
 builder.Services.AddObservabilityMetrics(builder.Configuration, OtelResourceBuilder.ResourceBuilder);
 builder.Services.AddObservabilityTracing(builder.Configuration, OtelResourceBuilder.ResourceBuilder);
-builder.Services.AddHttpLogging(o =>
-{
-    o.LoggingFields = HttpLoggingFields.All;
-    o.CombineLogs = true;
-});
 
     // Add Clients
 builder.Services.AddOpenMatchQueryPoolClient(builder.Configuration);
@@ -43,7 +38,6 @@ if (app.Environment.IsDevelopment()) {
 }
 
 //new LogRuntime().LogRuntimeInfo();
-app.UseHttpLogging();
 app.MapGrpcService<MatchFunctionRunService>();
 app.MapGrpcHealthChecksService();
 app.Run();
