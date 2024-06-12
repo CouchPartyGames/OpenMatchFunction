@@ -1,5 +1,7 @@
-﻿using OpenMatchFunction.Options;
+﻿using Google.Rpc;
+using OpenMatchFunction.Options;
 using OpenMatchFunction.Utilities.OpenMatch;
+using Status = Grpc.Core.Status;
 
 namespace OpenMatchFunction.Services;
 
@@ -17,7 +19,22 @@ public class MatchFunctionRunService : MatchFunction.MatchFunctionBase, IMatchFu
 
 	private readonly QueryPools _queryPools;
 
-	public MatchFunctionRunService(GrpcClientFactory grpcClientFactory, OtelMetrics metrics)
+	private static readonly Google.Rpc.Status QueryError = new Google.Rpc.Status
+	{
+		Code	= (int)Code.FailedPrecondition,
+		Message = "Failed Query Pools",
+		Details = {}
+	};
+	
+	private static readonly Google.Rpc.Status ProposalError = new Google.Rpc.Status
+	{
+		Code	= (int)Code.FailedPrecondition,
+		Message = "Failed Match Proposals",
+		Details = {}
+	};
+
+	public MatchFunctionRunService(GrpcClientFactory grpcClientFactory, 
+		OtelMetrics metrics)
 	{
 		_metrics = metrics;
 		_queryClient = grpcClientFactory.CreateClient<QueryService.QueryServiceClient>(OpenMatchOptions.OpenMatchQuery); 
@@ -26,33 +43,41 @@ public class MatchFunctionRunService : MatchFunction.MatchFunctionBase, IMatchFu
 
     public override async Task Run(RunRequest request, IServerStreamWriter<RunResponse> responseStream, ServerCallContext context)
     {
-	    List<TicketsInPool> tickets = [];
 	    using (var activity = OtelTracing.ActivitySource.StartActivity("RunRequest"))
 	    {
+		    Console.WriteLine(request);
 		    var shouldThrow = false;
 		    if (shouldThrow)
 		    {
 			    throw new RpcException(new Status(StatusCode.InvalidArgument, "Name is required."));
 		    }
 
+			List<TicketsInPool> tickets = [];
 		    using (OtelTracing.ActivitySource.StartActivity("FetchTickets"))
 		    {
 			    // Fetch Tickets from Pools
 			    tickets = _queryPools.QueryMultiplePools(request.Profile.Pools);
+			    
+		    }
+		    if (tickets.Count == 0)
+		    {
+			    throw QueryError.ToRpcException();
 		    }
 
 		    // Generate Proposals
 		    var proposals = GetProposals(request.Profile, tickets);
-
-		    // Send Back Matches
-		    foreach (var match in proposals)
+		    if (proposals.Count == 0)
 		    {
-			    // Respond with Proposals
-			    var response = new Matches.ResponseBuilder()
-				    .WithMatch(match)
-				    .Build();
+			    throw ProposalError.ToRpcException();
+		    }
 
-			    await responseStream.WriteAsync(response);
+		    // Send Back All Matches
+		    foreach(Match m in proposals)
+		    {
+			    // Add Logging, Metrics
+			    await responseStream.WriteAsync(new Matches.ResponseBuilder()
+				    .WithMatch(m)
+				    .Build());
 		    }
 	    }
     }
