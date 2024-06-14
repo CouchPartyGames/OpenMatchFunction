@@ -50,7 +50,7 @@ public class MatchFunctionRunService(
 	    }
 
 	    // Send Back All Matches
-	    MatchFunctionRunServiceLog.LogStage(logger, "GenerateProposals");
+	    MatchFunctionRunServiceLog.LogStage(logger, "SendMatches");
 	    foreach (Match m in proposals)
 	    {
 		    // Add Logging, Metrics
