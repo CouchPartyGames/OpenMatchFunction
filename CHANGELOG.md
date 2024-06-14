@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="0.4.4"></a>
+## 0.4.4 (2024-06-14)
+
+### Bug Fixes
+
+* correct query multiple pools, more detailed logging
+
 <a name="0.4.3"></a>
 ## 0.4.3 (2024-06-14)
 
