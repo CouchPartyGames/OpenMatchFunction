@@ -33,6 +33,7 @@ public static class QueryPools
         RepeatedField<Pool> pools,
         CancellationToken token)
     {
+        Console.WriteLine($"QueryMultiple: {pools}" );
         var tasks = pools.Select(p => QuerySinglePool(client, p, token)).ToArray();
         var results = await Task.WhenAll(tasks);
         return results.Select(r => r).ToList();

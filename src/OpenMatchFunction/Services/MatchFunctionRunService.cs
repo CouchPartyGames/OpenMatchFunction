@@ -30,7 +30,6 @@ public class MatchFunctionRunService(
 	    using (OtelTracing.ActivitySource.StartActivity("FetchTickets"))
 	    {
 		    // Fetch Tickets from Pools
-		    Console.WriteLine(request.Profile);
 		    tickets = await QueryPools.QueryMultiplePools(_queryClient, request.Profile.Pools, _token);
 			if (tickets.Count == 0)
 			{
