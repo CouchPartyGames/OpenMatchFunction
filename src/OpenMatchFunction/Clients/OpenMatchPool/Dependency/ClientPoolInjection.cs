@@ -13,14 +13,15 @@ public static class ClientPoolInjection
             {
                 var host = configuration["OPENMATCH_QUERY_HOST"] ?? OpenMatchOptions.OpenMatchQueryDefaultHost;
                 o.Address = new Uri(host);
-            }).ConfigureChannel(o =>
+            })
+            .ConfigureChannel(o =>
             {
                 o.HttpHandler = new SocketsHttpHandler()
                 {
                     PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
                     KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
                     KeepAlivePingDelay = TimeSpan.FromSeconds(60),
-                    EnableMultipleHttp2Connections = true
+                    EnableMultipleHttp2Connections = false
                 };
                 o.MaxRetryAttempts = 4;
             })
