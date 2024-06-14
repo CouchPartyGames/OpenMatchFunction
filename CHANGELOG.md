@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="0.4.13"></a>
+## 0.4.13 (2024-06-14)
+
+### Bug Fixes
+
+* bad url for query endpoint
+
 <a name="0.4.12"></a>
 ## 0.4.12 (2024-06-14)
 
