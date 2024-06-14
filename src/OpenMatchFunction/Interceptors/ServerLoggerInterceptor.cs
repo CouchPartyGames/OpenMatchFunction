@@ -1,4 +1,6 @@
-﻿namespace OpenMatchFunction.Interceptors;
+﻿using Google.Api;
+
+namespace OpenMatchFunction.Interceptors;
 
 public sealed class ServerLoggerInterceptor(ILogger<ServerLoggerInterceptor> logger) : Interceptor
 {
@@ -6,6 +8,7 @@ public sealed class ServerLoggerInterceptor(ILogger<ServerLoggerInterceptor> log
         ServerCallContext context, 
         ServerStreamingServerMethod<TRequest, TResponse> continuation)
     {
+        Console.WriteLine(request);
         ServerLoggerInterceptorLog.ServerErrorResponse(logger, context.Method, "ServerStreaming");
         return base.ServerStreamingServerHandler(request, responseStream, context, continuation);
     }
@@ -17,7 +20,7 @@ public static partial class ServerLoggerInterceptorLog
     [LoggerMessage(
         EventId = 0,
         Level = LogLevel.Error,
-        Message = "Server failed {Method}/{Type}")]
+        Message = "Server: {Method} {Type}")]
     public static partial void ServerErrorResponse(
         ILogger logger, string method, string type);
 }
