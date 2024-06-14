@@ -1,5 +1,6 @@
 ﻿using FluentValidation.Results;
 using OpenMatchFunction.Clients.OpenMatchPool.Options;
+using OpenMatchFunction.Interceptors;
 using OpenMatchFunction.Utilities.OpenMatch;
 
 namespace OpenMatchFunction.Services;
@@ -11,6 +12,7 @@ public interface IMatchFunctionRunService;
 
 public class MatchFunctionRunService(
 	GrpcClientFactory grpcClientFactory,
+	ILogger<MatchFunctionRunService> logger,
 	OtelMetrics metrics)
 	: MatchFunction.MatchFunctionBase, IMatchFunctionRunService
 {
@@ -26,6 +28,7 @@ public class MatchFunctionRunService(
 	    
 	    ValidateRunRequest(request);
 
+	    MatchFunctionRunServiceLog.LogStage(logger, "QueryMultiplePools");
 	    List<TicketsInPool> tickets = [];
 	    using (OtelTracing.ActivitySource.StartActivity("FetchTickets"))
 	    {
@@ -38,6 +41,7 @@ public class MatchFunctionRunService(
 	    }
 
 	    // Generate Proposals
+	    MatchFunctionRunServiceLog.LogStage(logger, "GenerateProposals");
 	    var proposals = GetProposals(request.Profile, tickets);
 	    if (proposals.Count == 0)
 	    {
@@ -45,6 +49,7 @@ public class MatchFunctionRunService(
 	    }
 
 	    // Send Back All Matches
+	    MatchFunctionRunServiceLog.LogStage(logger, "GenerateProposals");
 	    foreach (Match m in proposals)
 	    {
 		    // Add Logging, Metrics
@@ -93,4 +98,13 @@ public class MatchFunctionRunService(
 		    throw ServiceErrors.ValidationError.ToRpcException();
 	    }
     }
+}
+public static partial class MatchFunctionRunServiceLog
+{
+    [LoggerMessage(
+        EventId = 0,
+        Level = LogLevel.Information,
+        Message = "Entering Stage: {Stage}")]
+    public static partial void LogStage(
+        ILogger logger, string Stage);
 }
