@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="0.4.9"></a>
+## 0.4.9 (2024-06-14)
+
+### Bug Fixes
+
+* ensure pools are set
+
 <a name="0.4.8"></a>
 ## 0.4.8 (2024-06-14)
 
