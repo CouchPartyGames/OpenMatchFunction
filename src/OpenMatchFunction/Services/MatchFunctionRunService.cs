@@ -11,14 +11,14 @@ public interface IMatchFunctionRunService;
 
 public class MatchFunctionRunService(
 	GrpcClientFactory grpcClientFactory,
-	OtelMetrics metrics,
-	CancellationToken token)
+	OtelMetrics metrics)
 	: MatchFunction.MatchFunctionBase, IMatchFunctionRunService
 {
 	private readonly QueryService.QueryServiceClient _queryClient = grpcClientFactory.CreateClient<QueryService.QueryServiceClient>(OpenMatchOptions.OpenMatchQuery);
 	private readonly OtelMetrics _metrics = metrics;
 
 	private const string MatchFunctionName = "basic-match";
+	private CancellationToken _token = new CancellationToken();
 
 	public override async Task Run(RunRequest request, IServerStreamWriter<RunResponse> responseStream, ServerCallContext context)
     {
@@ -30,7 +30,7 @@ public class MatchFunctionRunService(
 	    using (OtelTracing.ActivitySource.StartActivity("FetchTickets"))
 	    {
 		    // Fetch Tickets from Pools
-		    tickets = await QueryPools.QueryMultiplePools(_queryClient, request.Profile.Pools, token);
+		    tickets = await QueryPools.QueryMultiplePools(_queryClient, request.Profile.Pools, _token);
 			if (tickets.Count == 0)
 			{
 				throw ServiceErrors.QueryError.ToRpcException();
