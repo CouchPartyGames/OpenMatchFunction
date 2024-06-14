@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="0.4.16"></a>
+## 0.4.16 (2024-06-14)
+
+### Bug Fixes
+
+* correct logging stage
+
 <a name="0.4.15"></a>
 ## 0.4.15 (2024-06-14)
 
