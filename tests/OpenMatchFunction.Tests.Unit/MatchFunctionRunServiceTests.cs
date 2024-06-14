@@ -22,7 +22,7 @@ public class MatchFunctionRunServiceTests
             .Returns(mockCall);
             */
         
-        var metrics = Substitute.For<IOpenMatchFunctionMetrics>();
+        //var metrics = Substitute.For<IOpenMatchFunctionMetrics>();
         //_sut = new MatchFunctionRunService(mockClient, metrics);
     }
     

@@ -42,7 +42,7 @@ public static partial class ClientLoggerInterceptorLog
 {
     [LoggerMessage(
         EventId = 0,
-        Level = LogLevel.Information,
+        Level = LogLevel.Debug,
         Message = "Call `{Method}`")]
     public static partial void LogCall(
         ILogger logger, string method);

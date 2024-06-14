@@ -2,12 +2,23 @@ namespace OpenMatchFunction.Services;
 
 public interface IProposal
 {
-    List<Match> GetMatches();
+    List<Ticket> GetMatches();
+    //List<Match> GetMatches();
 }
 
-public class Proposal : IProposal
+
+
+public class SimpleProposal : IProposal
 {
-    public List<Match> GetMatches()
+    public List<Ticket> GetMatches()
+    {
+        return [];
+    }
+}
+
+public class ComplexProposal : IProposal
+{
+    public List<Ticket> GetMatches()
     {
         return [];
     }

@@ -1,4 +1,5 @@
 using OpenMatchFunction.Clients.OpenMatchPool;
+using OpenMatchFunction.Clients.OpenMatchPool.Dependency;
 using OpenMatchFunction.Services;
 using OpenMatchFunction.Observability;
 using OpenMatchFunction.Observability.Dependency;

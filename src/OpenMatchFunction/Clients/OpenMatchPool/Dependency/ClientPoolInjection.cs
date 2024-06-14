@@ -1,7 +1,7 @@
+using OpenMatchFunction.Clients.OpenMatchPool.Options;
 using OpenMatchFunction.Interceptors;
-using OpenMatchFunction.Options;
 
-namespace OpenMatchFunction.Clients.OpenMatchPool;
+namespace OpenMatchFunction.Clients.OpenMatchPool.Dependency;
 
 public static class ClientPoolInjection
 {

@@ -4,10 +4,11 @@ namespace OpenMatchFunction.Utilities.OpenMatch;
 
 public record TicketsInPool(string Name, RepeatedField<Ticket> Tickets);
 
-public sealed class QueryPools(QueryService.QueryServiceClient client,
-    CancellationToken token)
+public static class QueryPools
 {
-    public async Task<TicketsInPool> QuerySinglePool(Pool pool)
+    public static async Task<TicketsInPool> QuerySinglePool(QueryService.QueryServiceClient client, 
+        Pool pool, 
+        CancellationToken token)
     {
         RepeatedField<Ticket> tickets = new();
         QueryTicketsRequest request = new QueryTicketsRequest
@@ -18,7 +19,7 @@ public sealed class QueryPools(QueryService.QueryServiceClient client,
         using var call = client.QueryTickets(request, 
             deadline: DateTime.UtcNow.AddSeconds(5), 
             cancellationToken: token);
-        await foreach (var response in call.ResponseStream.ReadAllAsync())
+        await foreach (var response in call.ResponseStream.ReadAllAsync(token))
         {
             tickets.Add(response.Tickets);
         }
@@ -26,18 +27,20 @@ public sealed class QueryPools(QueryService.QueryServiceClient client,
         return new TicketsInPool(pool.Name, tickets);
     }
 
-    public List<TicketsInPool> QueryMultiplePools(RepeatedField<Pool> pools)
+    public static async Task<List<TicketsInPool>> QueryMultiplePools(QueryService.QueryServiceClient client, 
+        RepeatedField<Pool> pools,
+        CancellationToken token)
     {
         var tasks = new List<Task<TicketsInPool>>();
         foreach (var pool in pools)
         {
-            tasks.Add(QuerySinglePool(pool));
+            tasks.Add(QuerySinglePool(client, pool, token));
         }
 
         Task<TicketsInPool[]> continuation = Task.WhenAll(tasks);
         try
         {
-            continuation.Wait();
+            continuation.Wait(token);
         }
         catch (AggregateException) { }
         
@@ -46,6 +49,6 @@ public sealed class QueryPools(QueryService.QueryServiceClient client,
             return continuation.Result.ToList();
         }
 
-        return new List<TicketsInPool>();
+        return [];
     }
 }

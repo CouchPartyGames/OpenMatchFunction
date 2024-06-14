@@ -1,7 +1,6 @@
-﻿using Google.Rpc;
-using OpenMatchFunction.Options;
+﻿using FluentValidation.Results;
+using OpenMatchFunction.Clients.OpenMatchPool.Options;
 using OpenMatchFunction.Utilities.OpenMatch;
-using Status = Grpc.Core.Status;
 
 namespace OpenMatchFunction.Services;
 
@@ -10,75 +9,49 @@ using OpenMatchFunction.Observability;
 
 public interface IMatchFunctionRunService;
 
-public class MatchFunctionRunService : MatchFunction.MatchFunctionBase, IMatchFunctionRunService
+public class MatchFunctionRunService(
+	GrpcClientFactory grpcClientFactory,
+	OtelMetrics metrics,
+	CancellationToken token)
+	: MatchFunction.MatchFunctionBase, IMatchFunctionRunService
 {
-	private readonly QueryService.QueryServiceClient _queryClient;
-	private readonly OtelMetrics _metrics;
+	private readonly QueryService.QueryServiceClient _queryClient = grpcClientFactory.CreateClient<QueryService.QueryServiceClient>(OpenMatchOptions.OpenMatchQuery);
+	private readonly OtelMetrics _metrics = metrics;
 
 	private const string MatchFunctionName = "basic-match";
 
-	private readonly QueryPools _queryPools;
-
-	private static readonly Google.Rpc.Status QueryError = new Google.Rpc.Status
-	{
-		Code	= (int)Code.FailedPrecondition,
-		Message = "Failed Query Pools",
-		Details = {}
-	};
-	
-	private static readonly Google.Rpc.Status ProposalError = new Google.Rpc.Status
-	{
-		Code	= (int)Code.FailedPrecondition,
-		Message = "Failed Match Proposals",
-		Details = {}
-	};
-
-	public MatchFunctionRunService(GrpcClientFactory grpcClientFactory, 
-		OtelMetrics metrics)
-	{
-		_metrics = metrics;
-		_queryClient = grpcClientFactory.CreateClient<QueryService.QueryServiceClient>(OpenMatchOptions.OpenMatchQuery); 
-		_queryPools = new QueryPools(_queryClient, new CancellationToken());
-	}
-
-    public override async Task Run(RunRequest request, IServerStreamWriter<RunResponse> responseStream, ServerCallContext context)
+	public override async Task Run(RunRequest request, IServerStreamWriter<RunResponse> responseStream, ServerCallContext context)
     {
-	    using (var activity = OtelTracing.ActivitySource.StartActivity("RunRequest"))
+	    using var activity = OtelTracing.ActivitySource.StartActivity("RunRequest");
+	    
+	    ValidateRunRequest(request);
+
+	    List<TicketsInPool> tickets = [];
+	    using (OtelTracing.ActivitySource.StartActivity("FetchTickets"))
 	    {
-		    Console.WriteLine(request);
-		    var shouldThrow = false;
-		    if (shouldThrow)
-		    {
-			    throw new RpcException(new Status(StatusCode.InvalidArgument, "Name is required."));
-		    }
+		    // Fetch Tickets from Pools
+		    tickets = await QueryPools.QueryMultiplePools(_queryClient, request.Profile.Pools, token);
+			if (tickets.Count == 0)
+			{
+				throw ServiceErrors.QueryError.ToRpcException();
+			}
+	    }
 
-			List<TicketsInPool> tickets = [];
-		    using (OtelTracing.ActivitySource.StartActivity("FetchTickets"))
-		    {
-			    // Fetch Tickets from Pools
-			    tickets = _queryPools.QueryMultiplePools(request.Profile.Pools);
-			    
-		    }
-		    if (tickets.Count == 0)
-		    {
-			    throw QueryError.ToRpcException();
-		    }
 
-		    // Generate Proposals
-		    var proposals = GetProposals(request.Profile, tickets);
-		    if (proposals.Count == 0)
-		    {
-			    throw ProposalError.ToRpcException();
-		    }
+	    // Generate Proposals
+	    var proposals = GetProposals(request.Profile, tickets);
+	    if (proposals.Count == 0)
+	    {
+		    throw ServiceErrors.ProposalError.ToRpcException();
+	    }
 
-		    // Send Back All Matches
-		    foreach(Match m in proposals)
-		    {
-			    // Add Logging, Metrics
-			    await responseStream.WriteAsync(new Matches.ResponseBuilder()
-				    .WithMatch(m)
-				    .Build());
-		    }
+	    // Send Back All Matches
+	    foreach (Match m in proposals)
+	    {
+		    // Add Logging, Metrics
+		    await responseStream.WriteAsync(new Matches.ResponseBuilder()
+			    .WithMatch(m)
+			    .Build());
 	    }
     }
 
@@ -100,7 +73,7 @@ public class MatchFunctionRunService : MatchFunction.MatchFunctionBase, IMatchFu
 			 // Remove from Pool Tickets
 		}
 
-		var match = new Matches.MatchBuilder()
+		Match match = new Matches.MatchBuilder()
 			 .WithId(matchId)
 			 .WithFunctionName(matchFunction)
 			 .WithProfileName(profileName)
@@ -110,5 +83,15 @@ public class MatchFunctionRunService : MatchFunction.MatchFunctionBase, IMatchFu
 
 		matches.Add(match);
 	    return matches;
+    }
+
+    private void ValidateRunRequest(RunRequest request)
+    {
+	    RunRequestValidator validator = new();
+	    ValidationResult results = validator.Validate(request);
+	    if (!results.IsValid)
+	    {
+		    throw ServiceErrors.ValidationError.ToRpcException();
+	    }
     }
 }

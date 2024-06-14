@@ -1,4 +1,4 @@
-﻿namespace OpenMatchFunction.Options;
+﻿namespace OpenMatchFunction.Clients.OpenMatchPool.Options;
 
 public sealed class OpenMatchOptions
 {
