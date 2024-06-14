@@ -12,7 +12,7 @@ public sealed class ServerLoggerInterceptor(ILogger<ServerLoggerInterceptor> log
         }
         catch (Exception ex)
         {
-            ServerLoggerInterceptorLog.ServerErrorResponse(logger);
+            ServerLoggerInterceptorLog.ServerErrorResponse(logger, context.Method);
             logger.LogError($"Failure {ex.Message}");
             throw;
         }
@@ -29,6 +29,7 @@ public sealed class ServerLoggerInterceptor(ILogger<ServerLoggerInterceptor> log
         ServerCallContext context, 
         ServerStreamingServerMethod<TRequest, TResponse> continuation)
     {
+        ServerLoggerInterceptorLog.ServerErrorResponse(logger, context.Method);
         return base.ServerStreamingServerHandler(request, responseStream, context, continuation);
     }
 
@@ -48,7 +49,7 @@ public static partial class ServerLoggerInterceptorLog
     [LoggerMessage(
         EventId = 0,
         Level = LogLevel.Error,
-        Message = "Server failed")]
+        Message = "Server failed {Method}")]
     public static partial void ServerErrorResponse(
-        ILogger logger);
+        ILogger logger, string method);
 }
