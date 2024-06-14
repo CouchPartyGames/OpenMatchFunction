@@ -18,25 +18,25 @@ public class MatchFunctionRunService(
 	private readonly OtelMetrics _metrics = metrics;
 
 	private const string MatchFunctionName = "basic-match";
-	private CancellationToken _token = new CancellationToken();
+	private readonly CancellationToken _token = new CancellationToken();
 
 	public override async Task Run(RunRequest request, IServerStreamWriter<RunResponse> responseStream, ServerCallContext context)
     {
 	    using var activity = OtelTracing.ActivitySource.StartActivity("RunRequest");
 	    
-	    ValidateRunRequest(request);
+	    //ValidateRunRequest(request);
 
 	    List<TicketsInPool> tickets = [];
 	    using (OtelTracing.ActivitySource.StartActivity("FetchTickets"))
 	    {
 		    // Fetch Tickets from Pools
+		    Console.WriteLine(request.Profile);
 		    tickets = await QueryPools.QueryMultiplePools(_queryClient, request.Profile.Pools, _token);
 			if (tickets.Count == 0)
 			{
 				throw ServiceErrors.QueryError.ToRpcException();
 			}
 	    }
-
 
 	    // Generate Proposals
 	    var proposals = GetProposals(request.Profile, tickets);

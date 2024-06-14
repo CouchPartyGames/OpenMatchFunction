@@ -36,26 +36,5 @@ public static class QueryPools
         var tasks = pools.Select(p => QuerySinglePool(client, p, token)).ToArray();
         var results = await Task.WhenAll(tasks);
         return results.Select(r => r).ToList();
-        
-        /*
-        var tasks = new List<Task<TicketsInPool>>();
-        foreach (var pool in pools)
-        {
-            tasks.Add(QuerySinglePool(client, pool, token));
-        }
-
-        Task<TicketsInPool[]> continuation = Task.WhenAll(tasks);
-        try
-        {
-            continuation.Wait(token);
-        }
-        catch (AggregateException) { }
-        
-        if (continuation.Status == TaskStatus.RanToCompletion)
-        {
-            return continuation.Result.ToList();
-        }
-        */
-
     }
 }
