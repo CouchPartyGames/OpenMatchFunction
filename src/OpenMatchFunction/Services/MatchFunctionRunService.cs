@@ -45,6 +45,7 @@ public class MatchFunctionRunService(
 	    var proposals = GetProposals(request.Profile, tickets);
 	    if (proposals.Count == 0)
 	    {
+		    Console.WriteLine("ServiceError: Empty Proposals");
 		    throw ServiceErrors.ProposalError.ToRpcException();
 	    }
 
