@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="0.4.12"></a>
+## 0.4.12 (2024-06-14)
+
+### Bug Fixes
+
+* disable http2 connection on query pool
+
 <a name="0.4.11"></a>
 ## 0.4.11 (2024-06-14)
 
