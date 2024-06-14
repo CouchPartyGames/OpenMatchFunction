@@ -31,6 +31,11 @@ public static class QueryPools
         RepeatedField<Pool> pools,
         CancellationToken token)
     {
+        var tasks = pools.Select(p => QuerySinglePool(client, p, token)).ToArray();
+        var results = await Task.WhenAll(tasks);
+        return results.Select(r => r).ToList();
+        
+        /*
         var tasks = new List<Task<TicketsInPool>>();
         foreach (var pool in pools)
         {
@@ -48,7 +53,7 @@ public static class QueryPools
         {
             return continuation.Result.ToList();
         }
+        */
 
-        return [];
     }
 }
