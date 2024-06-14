@@ -24,7 +24,7 @@ public class MatchFunctionRunService(
     {
 	    using var activity = OtelTracing.ActivitySource.StartActivity("RunRequest");
 	    
-	    //ValidateRunRequest(request);
+	    ValidateRunRequest(request);
 
 	    List<TicketsInPool> tickets = [];
 	    using (OtelTracing.ActivitySource.StartActivity("FetchTickets"))
