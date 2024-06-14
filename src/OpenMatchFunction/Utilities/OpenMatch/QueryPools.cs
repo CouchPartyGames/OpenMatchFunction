@@ -10,6 +10,8 @@ public static class QueryPools
         Pool pool, 
         CancellationToken token)
     {
+        Console.WriteLine("Single Pool Query");
+        Console.WriteLine(pool);
         RepeatedField<Ticket> tickets = new();
         QueryTicketsRequest request = new QueryTicketsRequest
         {
