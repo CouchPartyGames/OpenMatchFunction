@@ -1,6 +1,5 @@
 ﻿using FluentValidation.Results;
 using OpenMatchFunction.Clients.OpenMatchPool.Options;
-using OpenMatchFunction.Interceptors;
 using OpenMatchFunction.Utilities.OpenMatch;
 
 namespace OpenMatchFunction.Services;
@@ -8,13 +7,11 @@ namespace OpenMatchFunction.Services;
 using OpenMatch;
 using OpenMatchFunction.Observability;
 
-public interface IMatchFunctionRunService;
-
 public class MatchFunctionRunService(
 	GrpcClientFactory grpcClientFactory,
 	ILogger<MatchFunctionRunService> logger,
 	OtelMetrics metrics)
-	: MatchFunction.MatchFunctionBase, IMatchFunctionRunService
+	: MatchFunction.MatchFunctionBase
 {
 	private readonly QueryService.QueryServiceClient _queryClient = grpcClientFactory.CreateClient<QueryService.QueryServiceClient>(OpenMatchOptions.OpenMatchQuery);
 	private readonly OtelMetrics _metrics = metrics;
