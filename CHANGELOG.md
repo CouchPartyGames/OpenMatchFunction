@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [versionize](https://github.com/versionize/versionize) for commit guidelines.
 
+<a name="0.5.0"></a>
+## 0.5.0 (2024-06-28)
+
+### Features
+
+* add unknown ignore
+
 <a name="0.4.16"></a>
 ## 0.4.16 (2024-06-14)
 
