@@ -19,6 +19,7 @@ public static class ServiceInjection {
                 var msgSize = 1024 * 1024 * 4;  // MB
                 o.Interceptors.Add<ServerLoggerInterceptor>();
                 o.EnableDetailedErrors = true;
+                o.IgnoreUnknownServices = true;
                 o.MaxReceiveMessageSize = msgSize;
                 o.MaxReceiveMessageSize = msgSize;
                 o.ResponseCompressionLevel = CompressionLevel.Optimal;
