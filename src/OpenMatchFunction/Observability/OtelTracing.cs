@@ -2,7 +2,7 @@ namespace OpenMatchFunction.Observability;
 
 public static class OtelTracing
 {
-    public static readonly ActivitySource ActivitySource = new(GlobalConsts.ServiceName, GlobalConsts.ServiceVersion);
+    public static readonly ActivitySource ActivitySource = new(GlobalConstants.ServiceName, GlobalConstants.ServiceVersion);
 
     public const string RunRequest = "RunRequest";
     public const string FetchTickets = "FetchTickets";

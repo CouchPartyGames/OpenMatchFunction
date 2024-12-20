@@ -12,19 +12,19 @@ public static class ServiceInjection {
         var options = configuration
             .GetSection(ServiceOptions.SectionName)
             .Get<ServiceOptions>();
-        
+
         services
             .AddGrpc(o =>
             {
-                var msgSize = 1024 * 1024 * 4;  // MB
+                var msgSize = 1024 * 1024 * 4; // MB
                 o.Interceptors.Add<ServerLoggerInterceptor>();
                 o.EnableDetailedErrors = true;
                 o.IgnoreUnknownServices = true;
                 o.MaxReceiveMessageSize = msgSize;
                 o.MaxReceiveMessageSize = msgSize;
                 o.ResponseCompressionLevel = CompressionLevel.Optimal;
-            })
-            .AddJsonTranscoding();
+            });
+            //.AddJsonTranscoding();
 
         services.AddHttpContextAccessor();
         
